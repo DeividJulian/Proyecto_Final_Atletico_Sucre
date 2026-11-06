@@ -10,7 +10,8 @@ Página web informativa + registro de padres de familia + paneles por rol (padre
 | Parte | URL |
 |---|---|
 | Web (Vercel) | _pendiente (Fase 6)_ |
-| API (Render) | _pendiente (Fase 3)_ — documentación en `/docs` |
+| API (Render) | https://proyecto-final-atletico-sucre.onrender.com — documentación interactiva en [/docs](https://proyecto-final-atletico-sucre.onrender.com/docs), salud en [/health](https://proyecto-final-atletico-sucre.onrender.com/health) |
+| Base de datos | PostgreSQL en Supabase (Session pooler, puerto 5432) con RLS activado en todas las tablas |
 | APK Android | _pendiente (Fase 7)_ — GitHub Releases |
 
 ## Cuentas de prueba
@@ -101,7 +102,10 @@ npm run build      # salida en dist/atletico-sucre-web/browser
 - Blueprint: `backend/render.yaml` (`rootDir: backend`, `healthCheckPath: /health`).
 - Variables secretas que se ingresan en el panel: `DATABASE_URL` (**Session pooler** de Supabase, puerto 5432), `ADMIN_EMAILS`,
   `ADMIN_PASSWORD_INICIAL`, `FRONTEND_ORIGIN`, `BREVO_API_KEY`, `EMAIL_FROM`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
-- El plan gratis se duerme: la web muestra "Conectando con el servidor…" mientras despierta.
+- El plan gratis se duerme tras 15 minutos sin uso; la primera visita tarda unos 50 s y la web muestra
+  "Conectando con el servidor…" mientras despierta. Antes de una demostración, abre la página un minuto antes.
+- Datos iniciales en producción: `python seed.py` desde tu PC con `ENVIRONMENT=production` y la `DATABASE_URL`
+  del Session pooler (no crea cuentas de prueba).
 
 ### Frontend en Vercel
 - Root directory: `frontend` · Build: `npm run build` · Output: `dist/atletico-sucre-web/browser`.

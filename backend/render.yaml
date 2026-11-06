@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: atletico-sucre-backend
+    name: proyecto-final-atletico-sucre
     runtime: python
     plan: free
     rootDir: backend
