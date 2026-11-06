@@ -1,5 +1,7 @@
 import { Component, inject } from '@angular/core';
 
+import { environment } from '../../../environments/environment';
+import { API_URL } from '../../core/config/api-url';
 import { ConnectionService } from '../../core/services/connection.service';
 import { PublicContentStore } from '../../core/state/public-content.store';
 
@@ -13,7 +15,14 @@ import { PublicContentStore } from '../../core/state/public-content.store';
           <span class="status__spinner" aria-hidden="true"></span>
           <span><strong>Conectando con el servidor…</strong> La primera visita puede tardar hasta un minuto.</span>
         } @else {
-          <span>No pudimos conectar con el servidor. Revisa tu internet.</span>
+          @if (isDevelopment) {
+            <span>
+              No hay respuesta del backend local (<code>{{ apiUrl }}</code>). ¿Está corriendo
+              <code>uvicorn main:app --reload --port 8000</code>?
+            </span>
+          } @else {
+            <span>No pudimos conectar con el servidor. Revisa tu internet.</span>
+          }
           <button type="button" class="status__retry" (click)="retry()">Reintentar</button>
         }
       </div>
@@ -39,6 +48,7 @@ import { PublicContentStore } from '../../core/state/public-content.store';
       font-size: 0.92rem;
     }
     .status--offline { border-color: var(--color-red); }
+    .status code { color: var(--color-gold-light); font-size: 0.85em; }
     .status__spinner {
       width: 20px;
       height: 20px;
@@ -65,6 +75,9 @@ import { PublicContentStore } from '../../core/state/public-content.store';
 export class ConnectionStatus {
   protected readonly connection = inject(ConnectionService);
   private readonly store = inject(PublicContentStore);
+  /** In development the API is the local uvicorn: say so instead of blaming the internet. */
+  protected readonly isDevelopment = !environment.production;
+  protected readonly apiUrl = API_URL;
 
   retry(): void {
     void this.connection.retry().then(() => this.store.retry());
