@@ -1,0 +1,131 @@
+<a class="back" routerLink="/padre">← Mis hijos</a>
+
+@if (error(); as message) {
+  <p class="alert">{{ message }}</p>
+} @else if (player(); as p) {
+  <header class="child-head card">
+    <div class="child-head__photo">
+      <app-private-photo
+        [source]="photoLoader()"
+        [version]="photoVersion()"
+        [initials]="initials(p)"
+        [alt]="'Foto de ' + p.first_names"
+        imgClass="child-photo"
+      />
+      <label class="photo-btn">
+        📷 {{ p.has_photo ? 'Cambiar foto' : 'Subir foto' }}
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="uploadPhoto($event)" />
+      </label>
+    </div>
+    <div>
+      <h2 class="child-name">{{ p.full_name }}</h2>
+      <span class="pill" [class]="'pill pill--' + p.enrollment_status">{{ label('enrollment', p.enrollment_status) }}</span>
+      <dl class="data-list child-facts">
+        <div><dt>Categoría</dt><dd>{{ p.category?.name ?? 'Por asignar' }}</dd></div>
+        <div><dt>Dorsal / posición</dt><dd>{{ p.jersey_number ?? '—' }} · {{ label('position', p.position) }}</dd></div>
+      </dl>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Información del deportista">
+    <button type="button" role="tab" [attr.aria-selected]="tab() === 'ficha'" (click)="open('ficha')">Ficha y horario</button>
+    <button type="button" role="tab" [attr.aria-selected]="tab() === 'asistencia'" (click)="open('asistencia')">Asistencia</button>
+    <button type="button" role="tab" [attr.aria-selected]="tab() === 'pagos'" (click)="open('pagos')">Pagos</button>
+    <button type="button" role="tab" [attr.aria-selected]="tab() === 'observaciones'" (click)="open('observaciones')">Observaciones</button>
+  </div>
+
+  @switch (tab()) {
+    @case ('ficha') {
+      <section class="grid two">
+        <article class="card">
+          <h3>Horario y sede</h3>
+          @if (p.schedule.length) {
+            <ul class="slots" role="list">
+              @for (slot of p.schedule; track slot.session_id) {
+                <li>
+                  <strong>{{ slot.weekday_name }}</strong>
+                  <span>{{ time(slot.start_time) }} – {{ time(slot.end_time) }}</span>
+                  <small>📍 {{ slot.venue_name }}</small>
+                </li>
+              }
+            </ul>
+            <p class="field-hint">Entrena en {{ label('trainingShift', p.training_shift).toLowerCase() }} (colegio en la {{ label('schoolShift', p.school_shift).toLowerCase() }}).</p>
+          } @else {
+            <p class="empty">El horario aparecerá cuando se asigne la categoría.</p>
+          }
+        </article>
+
+        <article class="card">
+          <h3>Datos del deportista</h3>
+          @if (!editing()) {
+            <dl class="data-list">
+              <div><dt>Documento</dt><dd>{{ p.document_type }} {{ p.document_number }}</dd></div>
+              <div><dt>Nacimiento</dt><dd>{{ p.birth_date | date: 'longDate' }} ({{ p.age }} años)</dd></div>
+              <div><dt>Colegio</dt><dd>{{ p.school_name }}</dd></div>
+              <div><dt>EPS / RH</dt><dd>{{ p.health.eps }} · {{ p.health.blood_type ?? '—' }}</dd></div>
+              <div><dt>Alergias</dt><dd>{{ p.health.allergies ?? 'Ninguna registrada' }}</dd></div>
+              <div><dt>Emergencia</dt><dd>{{ p.health.emergency_contact_name }} · {{ phone(p.health.emergency_contact_phone) }}</dd></div>
+            </dl>
+            <button type="button" class="btn btn--outline edit-btn" (click)="startEdit(p)">Corregir datos</button>
+          } @else if (form) {
+            <app-player-fields [form]="form" prefix="edit" />
+            <div class="form-actions">
+              <button type="button" class="btn btn--primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar cambios' }}</button>
+              <button type="button" class="btn btn--outline" (click)="editing.set(false)">Cancelar</button>
+            </div>
+          }
+        </article>
+      </section>
+    }
+
+    @case ('asistencia') {
+      @if (attendance(); as a) {
+        <section class="grid stats">
+          <div class="card stat"><strong>{{ a.rate }}%</strong><span>Asistencia</span></div>
+          <div class="card stat"><strong>{{ a.present }}</strong><span>Asistió</span></div>
+          <div class="card stat"><strong>{{ a.late }}</strong><span>Tarde</span></div>
+          <div class="card stat"><strong>{{ a.absent }}</strong><span>Faltó</span></div>
+        </section>
+        @if (a.records.length) {
+          <ul class="records card" role="list">
+            @for (record of a.records; track record.id) {
+              <li>
+                <span>{{ record.session_date | date: 'EEEE d MMM' }} · {{ time(record.start_time) }}</span>
+                <span class="pill" [class]="'pill pill--' + record.status">{{ label('attendance', record.status) }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty card">Todavía no hay asistencia registrada.</p>
+        }
+      } @else {
+        <div class="skeleton"></div>
+      }
+    }
+
+    @case ('pagos') {
+      <app-child-payments [player]="p" />
+    }
+
+    @case ('observaciones') {
+      @if (notes(); as list) {
+        @if (list.length) {
+          <ul class="notes" role="list">
+            @for (note of list; track note.id) {
+              <li class="card">
+                <time>{{ note.note_date | date: 'longDate' }}</time>
+                <p>{{ note.content }}</p>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty card">El profesor todavía no ha registrado observaciones.</p>
+        }
+      } @else {
+        <div class="skeleton"></div>
+      }
+    }
+  }
+} @else {
+  <div class="skeleton"></div>
+}

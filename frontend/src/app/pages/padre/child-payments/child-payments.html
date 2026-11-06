@@ -1,0 +1,157 @@
+@if (error(); as message) {
+  <p class="alert">{{ message }}</p>
+} @else if (account(); as a) {
+  <section class="summary-grid">
+    <article class="card balance" [class.balance--ok]="a.is_up_to_date">
+      <span class="balance__label">Estado</span>
+      <strong>{{ a.is_up_to_date ? 'Al día ✓' : approved() ? 'Pendiente de pago' : 'Inscripción en revisión' }}</strong>
+      @if (a.amount_due > 0) {
+        <span>Debe: <b>{{ cop(a.amount_due) }}</b>{{ a.overdue_months ? ' (' + a.overdue_months + ' mes(es) vencido(s))' : '' }}</span>
+      }
+      @if (!a.enrollment_paid) {
+        <span class="balance__hint">La inscripción todavía no está pagada o verificada.</span>
+      }
+    </article>
+    <article class="card how-to-pay">
+      <span class="balance__label">Cómo pagar</span>
+      @if (store.club(); as club) {
+        @if (club.nequi_number) {
+          <p><strong>Nequi {{ phone(club.nequi_number) }}</strong><br />A nombre de {{ club.nequi_holder }}</p>
+        } @else {
+          <p>{{ club.payment_contact_message }}</p>
+          <a class="btn btn--whatsapp" [href]="whatsappUrl()" target="_blank" rel="noopener noreferrer">Pedir datos por WhatsApp</a>
+        }
+        <p class="field-hint">También puedes pagar en efectivo en la cancha. La mensualidad vence el día {{ club.due_day }}.</p>
+      }
+    </article>
+  </section>
+
+  <div class="actions">
+    @if (!a.enrollment_paid) {
+      <button type="button" class="btn btn--gold" (click)="openForm('enrollment')">Reportar pago de inscripción</button>
+    }
+    @if (approved()) {
+      <button type="button" class="btn btn--primary" (click)="openForm('monthly')">Reportar pago de mensualidad</button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <form class="card pay-form" [formGroup]="form" (ngSubmit)="send()" novalidate>
+      <h3>Reportar un pago</h3>
+      <div class="form-grid">
+        <fieldset class="field field--wide">
+          <legend>Concepto</legend>
+          <div class="choice-row">
+            <label class="choice"><input type="radio" formControlName="concept" value="enrollment" /> Inscripción</label>
+            @if (approved()) {
+              <label class="choice"><input type="radio" formControlName="concept" value="monthly" /> Mensualidad</label>
+            }
+          </div>
+        </fieldset>
+        @if (form.controls.concept.value === 'monthly') {
+          <div class="field">
+            <label for="pay-month">Mes que pagas</label>
+            <select id="pay-month" formControlName="period_month">
+              @for (name of months; track name; let i = $index) {
+                <option [ngValue]="i + 1">{{ name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="pay-year">Año</label>
+            <select id="pay-year" formControlName="period_year">
+              @for (y of years; track y) {
+                <option [ngValue]="y">{{ y }}</option>
+              }
+            </select>
+          </div>
+        }
+        <div class="field">
+          <label for="pay-amount">Valor pagado (COP)</label>
+          <input id="pay-amount" type="number" inputmode="numeric" formControlName="amount" min="1" />
+          <app-field-error [control]="form.controls.amount" />
+        </div>
+        <div class="field">
+          <label for="pay-date">Fecha del pago</label>
+          <input id="pay-date" type="date" formControlName="paid_on" [max]="today" />
+        </div>
+        <fieldset class="field field--wide">
+          <legend>Método</legend>
+          <div class="choice-row">
+            <label class="choice"><input type="radio" formControlName="method" value="nequi" /> Nequi</label>
+            <label class="choice"><input type="radio" formControlName="method" value="cash" /> Efectivo</label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="pay-ref">Número de referencia (opcional)</label>
+          <input id="pay-ref" formControlName="reference_number" placeholder="Ej. M12345678" />
+        </div>
+        <div class="field">
+          <label for="pay-file">Comprobante {{ form.controls.method.value === 'nequi' ? '*' : '(opcional)' }}</label>
+          <input id="pay-file" type="file" accept="image/jpeg,image/png,image/webp" (change)="pickReceipt($event)" />
+          @if (receiptError(); as message) {
+            <p class="field-error">{{ message }}</p>
+          } @else if (receipt(); as file) {
+            <p class="field-hint">📎 {{ file.name }}</p>
+          }
+        </div>
+        <div class="field field--wide">
+          <label for="pay-notes">Nota para el club (opcional)</label>
+          <textarea id="pay-notes" formControlName="notes" rows="2" placeholder="Ej. Pagó el tío"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="sending()">{{ sending() ? 'Enviando…' : 'Enviar pago' }}</button>
+        <button type="button" class="btn btn--outline" (click)="showForm.set(false)">Cancelar</button>
+      </div>
+    </form>
+  }
+
+  <section class="card">
+    <div class="year-bar">
+      <button type="button" class="btn btn--outline" (click)="changeYear(-1)" aria-label="Año anterior">‹</button>
+      <h3>Mensualidades {{ year() }}</h3>
+      <button type="button" class="btn btn--outline" (click)="changeYear(1)" aria-label="Año siguiente">›</button>
+    </div>
+    <ul class="months" role="list">
+      @for (m of a.months; track m.month) {
+        <li class="month" [class]="'month month--' + m.status">
+          <span class="month__name">{{ m.month_name.slice(0, 3) }}</span>
+          <span class="month__status">{{ label('month', m.status) }}</span>
+          @if (approved() && canPay(m.status)) {
+            <button type="button" class="month__pay" (click)="openForm('monthly', m.month, m.year)">Pagar</button>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="card">
+    <h3>Pagos reportados</h3>
+    @if (a.payments.length) {
+      <ul class="payments" role="list">
+        @for (pay of a.payments; track pay.id) {
+          <li>
+            <div>
+              <strong>{{ period(pay) }}</strong>
+              <span class="field-hint">{{ cop(pay.amount) }} · {{ label('method', pay.method) }} · {{ pay.paid_on | date: 'mediumDate' }}</span>
+              @if (pay.status === 'rejected' && pay.rejection_reason) {
+                <span class="field-error">Motivo: {{ pay.rejection_reason }}</span>
+              }
+            </div>
+            <div class="payments__side">
+              <span class="pill" [class]="'pill pill--' + pay.status">{{ label('payment', pay.status) }}</span>
+              @if (pay.has_receipt) {
+                <button type="button" class="link-btn" (click)="viewReceipt(pay)">Ver comprobante</button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="empty">Todavía no has reportado pagos.</p>
+    }
+  </section>
+} @else {
+  <div class="skeleton"></div>
+}

@@ -1,0 +1,156 @@
+<section class="auth-page register">
+  <div class="container">
+    <div class="auth-card auth-card--wide" #top>
+      <p class="eyebrow">Inscripción en línea</p>
+      <h1>Inscribe a tu hijo</h1>
+      <p class="lead">
+        Completa el formulario. La inscripción queda <strong>pendiente</strong> hasta que el club la apruebe.
+      </p>
+
+      <ol class="stepper" aria-label="Pasos del registro">
+        @for (name of steps; track name; let i = $index) {
+          <li [class.stepper--done]="i < step()" [class.stepper--current]="i === step()" [attr.aria-current]="i === step() ? 'step' : null">
+            <span class="stepper__dot">{{ i < step() ? '✓' : i + 1 }}</span>
+            <span class="stepper__name">{{ name }}</span>
+          </li>
+        }
+      </ol>
+
+      @if (error(); as message) {
+        <p class="alert" role="alert">{{ message }}</p>
+      }
+
+      <!-- 1. Acudiente y cuenta -->
+      @if (step() === 0) {
+        <h2 class="step-title">Tus datos (acudiente)</h2>
+        <app-guardian-fields [form]="guardian" />
+
+        <h2 class="step-title">Tu cuenta</h2>
+        <p class="field-hint step-hint">Con este correo y contraseña entrarás al panel y a la app.</p>
+        <div class="form-grid" [formGroup]="account">
+          <div class="field field--wide">
+            <label for="r-email">Correo *</label>
+            <input id="r-email" type="email" formControlName="email" autocomplete="email" inputmode="email" />
+            <app-field-error [control]="account.controls.email" />
+          </div>
+          <div class="field">
+            <label for="r-pass">Contraseña *</label>
+            <input id="r-pass" type="password" formControlName="password" autocomplete="new-password" />
+            <app-field-error [control]="account.controls.password" />
+            <p class="field-hint">Mínimo 8 caracteres, con letras y números.</p>
+          </div>
+          <div class="field">
+            <label for="r-confirm">Repite la contraseña *</label>
+            <input id="r-confirm" type="password" formControlName="confirm" autocomplete="new-password" />
+            <app-field-error [control]="account.controls.confirm" />
+            @if (account.hasError('mismatch') && account.controls.confirm.touched) {
+              <p class="field-error">Las contraseñas no coinciden.</p>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- 2. Hijos -->
+      @if (step() === 1) {
+        <h2 class="step-title">Datos de tus hijos</h2>
+        @for (form of players.controls; track form; let i = $index) {
+          <fieldset class="child">
+            <legend>
+              Deportista {{ i + 1 }}
+              @if (players.length > 1) {
+                <button type="button" class="child__remove" (click)="removePlayer(i)">Quitar</button>
+              }
+            </legend>
+            <app-player-fields [form]="form" [prefix]="'p' + i" />
+          </fieldset>
+        }
+        @if (players.length < maxPlayers) {
+          <button type="button" class="btn btn--outline add-child" (click)="addPlayer()">+ Agregar otro hijo</button>
+        }
+      }
+
+      <!-- 3. Autorizaciones -->
+      @if (step() === 2) {
+        <h2 class="step-title">Autorizaciones</h2>
+        <div class="policy-box" tabindex="0" aria-label="Política de tratamiento de datos personales">
+          @if (store.club(); as club) {
+            <p class="policy-box__version">Ley 1581 de 2012 · versión {{ club.data_policy_version }}</p>
+            <p>{{ club.data_policy_text }}</p>
+          } @else {
+            <p>Cargando la política de tratamiento de datos…</p>
+          }
+        </div>
+        <div class="consents" [formGroup]="consents">
+          <label class="check">
+            <input type="checkbox" formControlName="data" />
+            <span>
+              <strong>Autorizo el tratamiento de mis datos personales y los de mi(s) hijo(s)</strong>, incluidos los
+              datos de salud, según la política del club (Ley 1581 de 2012). <em>Obligatoria.</em>
+            </span>
+          </label>
+          <app-field-error [control]="consents.controls.data" />
+          <label class="check">
+            <input type="checkbox" formControlName="image" />
+            <span>
+              Autorizo el uso de fotos y videos de mi(s) hijo(s) en las redes y la página del club. <em>Opcional.</em>
+            </span>
+          </label>
+        </div>
+      }
+
+      <!-- 4. Confirmar -->
+      @if (step() === 3) {
+        <h2 class="step-title">Revisa y confirma</h2>
+        <div class="summary">
+          <section class="card">
+            <h3>Acudiente <button type="button" class="link" (click)="goTo(0)">Editar</button></h3>
+            <dl class="data-list">
+              <div><dt>Nombre</dt><dd>{{ guardian.value.first_names }} {{ guardian.value.last_names }}</dd></div>
+              <div><dt>Documento</dt><dd>{{ guardian.value.document_type }} {{ guardian.value.document_number }}</dd></div>
+              <div><dt>Celular</dt><dd>{{ guardian.value.phone }}</dd></div>
+              <div><dt>Parentesco</dt><dd>{{ label('relationship', guardian.value.relationship_to_player) }}</dd></div>
+              <div><dt>Correo de la cuenta</dt><dd>{{ account.value.email }}</dd></div>
+            </dl>
+          </section>
+          @for (form of players.controls; track form; let i = $index) {
+            <section class="card">
+              <h3>Deportista {{ i + 1 }} <button type="button" class="link" (click)="goTo(1)">Editar</button></h3>
+              <dl class="data-list">
+                <div><dt>Nombre</dt><dd>{{ form.value.first_names }} {{ form.value.last_names }}</dd></div>
+                <div><dt>Nacimiento</dt><dd>{{ form.value.birth_date }}</dd></div>
+                <div><dt>Categoría estimada</dt><dd>{{ category(i) }}</dd></div>
+                <div><dt>Colegio</dt><dd>{{ form.value.school_name }} ({{ label('schoolShift', form.value.school_shift) }})</dd></div>
+              </dl>
+            </section>
+          }
+          <section class="card">
+            <h3>Autorizaciones</h3>
+            <p>✓ Tratamiento de datos personales (Ley 1581)</p>
+            <p>{{ consents.value.image ? '✓' : '✗' }} Uso de imagen</p>
+          </section>
+          @if (store.club(); as club) {
+            <p class="notice">
+              Cuando la inscripción sea aprobada: inscripción {{ cop(club.enrollment_fee) }} (pago único) y mensualidad
+              {{ cop(club.monthly_fee) }}. Podrás reportar los pagos desde tu panel.
+            </p>
+          }
+        </div>
+      }
+
+      <div class="form-actions wizard-actions">
+        @if (step() > 0) {
+          <button type="button" class="btn btn--outline" (click)="back()" [disabled]="loading()">← Atrás</button>
+        }
+        @if (step() < steps.length - 1) {
+          <button type="button" class="btn btn--primary" (click)="next()">Continuar →</button>
+        } @else {
+          <button type="button" class="btn btn--primary" (click)="submit()" [disabled]="loading()">
+            {{ loading() ? 'Enviando…' : 'Enviar inscripción' }}
+          </button>
+        }
+      </div>
+
+      <div class="auth-links"><span>¿Ya tienes cuenta? <a routerLink="/ingresar">Ingresa aquí</a></span></div>
+    </div>
+  </div>
+</section>

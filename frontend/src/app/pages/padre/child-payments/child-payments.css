@@ -1,0 +1,163 @@
+:host {
+  display: grid;
+  gap: 16px;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 16px;
+}
+.balance {
+  display: grid;
+  gap: 4px;
+  border-left: 5px solid var(--color-red);
+}
+.balance--ok {
+  border-left-color: var(--color-success);
+}
+.balance strong {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  text-transform: uppercase;
+}
+.balance__label {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-gray-500);
+}
+.balance__hint {
+  font-size: 0.88rem;
+  color: var(--color-warning);
+}
+.how-to-pay p {
+  margin: 4px 0 8px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pay-form h3,
+.card h3 {
+  font-size: 1.15rem;
+  text-transform: uppercase;
+}
+
+.year-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.year-bar h3 {
+  margin: 0;
+}
+.year-bar .btn {
+  min-height: 40px;
+  width: 44px;
+  padding: 0;
+  font-size: 1.3rem;
+}
+
+.months {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.month {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  text-align: center;
+  padding: 10px 4px;
+  border-radius: var(--radius-sm);
+  background: var(--color-gray-100);
+  color: var(--color-gray-500);
+}
+.month__name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+.month__status {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.month--paid {
+  background: #e3f5ea;
+  color: #166534;
+}
+.month--in_review,
+.month--due,
+.month--grace {
+  background: var(--color-gold-soft);
+  color: #7a5a00;
+}
+.month--overdue {
+  background: var(--color-red-soft);
+  color: var(--color-red-dark);
+}
+.month__pay {
+  margin-top: 4px;
+  border: 0;
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: var(--color-red);
+  color: var(--color-white);
+  font: 700 0.72rem var(--font-body);
+  cursor: pointer;
+}
+
+.payments {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.payments li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+.payments li:last-child {
+  border-bottom: 0;
+}
+.payments li > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+.payments__side {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  align-content: start;
+}
+.link-btn {
+  border: 0;
+  background: none;
+  color: var(--color-red);
+  font: 600 0.85rem var(--font-body);
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .months {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

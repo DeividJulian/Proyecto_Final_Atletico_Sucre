@@ -15,8 +15,13 @@
     </nav>
 
     <div class="nav__actions">
-      <a class="btn btn--outline nav__login" routerLink="/ingresar">Ingresar</a>
-      <a class="btn btn--primary nav__cta" routerLink="/registro">Inscribe a tu hijo</a>
+      @if (auth.isLoggedIn()) {
+        <a class="btn btn--primary nav__cta" [routerLink]="auth.homeUrl()">Mi panel</a>
+        <button type="button" class="btn btn--outline nav__login" (click)="logout()">Cerrar sesión</button>
+      } @else {
+        <a class="btn btn--outline nav__login" routerLink="/ingresar">Ingresar</a>
+        <a class="btn btn--primary nav__cta" routerLink="/registro">Inscribe a tu hijo</a>
+      }
     </div>
 
     <button
@@ -36,8 +41,13 @@
       <a routerLink="/" [fragment]="link.fragment" (click)="close()">{{ link.label }}</a>
     }
     <div class="nav__drawer-actions">
-      <a class="btn btn--primary btn--block" routerLink="/registro" (click)="close()">Inscribe a tu hijo</a>
-      <a class="btn btn--outline btn--block" routerLink="/ingresar" (click)="close()">Ingresar</a>
+      @if (auth.isLoggedIn()) {
+        <a class="btn btn--primary btn--block" [routerLink]="auth.homeUrl()" (click)="close()">Mi panel</a>
+        <button type="button" class="btn btn--outline btn--block" (click)="logout()">Cerrar sesión</button>
+      } @else {
+        <a class="btn btn--primary btn--block" routerLink="/registro" (click)="close()">Inscribe a tu hijo</a>
+        <a class="btn btn--outline btn--block" routerLink="/ingresar" (click)="close()">Ingresar</a>
+      }
     </div>
   </nav>
 </header>
