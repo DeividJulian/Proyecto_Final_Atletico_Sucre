@@ -99,7 +99,7 @@ npm run build      # salida en dist/atletico-sucre-web/browser
 
 ### Backend en Render
 - Blueprint: `backend/render.yaml` (`rootDir: backend`, `healthCheckPath: /health`).
-- Variables secretas que se ingresan en el panel: `DATABASE_URL` (pooler de Supabase), `ADMIN_EMAILS`,
+- Variables secretas que se ingresan en el panel: `DATABASE_URL` (**Session pooler** de Supabase, puerto 5432), `ADMIN_EMAILS`,
   `ADMIN_PASSWORD_INICIAL`, `FRONTEND_ORIGIN`, `BREVO_API_KEY`, `EMAIL_FROM`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
 - El plan gratis se duerme: la web muestra "Conectando con el servidor…" mientras despierta.
 

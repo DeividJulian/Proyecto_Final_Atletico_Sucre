@@ -65,6 +65,15 @@ def test_seed_in_development_creates_test_accounts():
 
 
 def test_supabase_url_is_normalized():
-    assert config._normalize_database_url("postgresql://u:p@host:6543/postgres") == "postgresql+psycopg://u:p@host:6543/postgres"
+    assert config._normalize_database_url("postgresql://u:p@host:5432/postgres") == "postgresql+psycopg://u:p@host:5432/postgres"
     assert config._normalize_database_url("postgres://u:p@host/db") == "postgresql+psycopg://u:p@host/db"
     assert config._normalize_database_url("sqlite:///x.db") == "sqlite:///x.db"
+
+
+def test_postgres_engine_options_for_supabase_pooler():
+    from database import _engine_options
+
+    options = _engine_options("postgresql+psycopg://u:p@aws-0-us-east-1.pooler.supabase.com:5432/postgres")
+    assert options["pool_pre_ping"] is True
+    assert options["connect_args"] == {"prepare_threshold": None}
+    assert "prepare_threshold" not in _engine_options("sqlite:///x.db").get("connect_args", {})

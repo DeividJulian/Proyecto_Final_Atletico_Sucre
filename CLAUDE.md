@@ -68,7 +68,7 @@ Referencia de código: `https://github.com/DeividJulian/sistema-horarios-univers
 - Archivos (fotos de deportistas, galería, APK): Supabase Storage o GitHub Releases; nunca dentro del repo.
 
 **Base de datos**
-- **PostgreSQL en Supabase** (plan gratis). Cadena: `DATABASE_URL=postgresql+psycopg://...`. Usar el *connection pooler* de Supabase para Render.
+- **PostgreSQL en Supabase** (plan gratis). Cadena: `DATABASE_URL=postgresql+psycopg://...`. Usar el **Session pooler** de Supabase (puerto 5432) para Render; `database.py` desactiva los prepared statements (`prepare_threshold=None`) y usa `pool_pre_ping`.
 - Tablas creadas con `Base.metadata.create_all` + un `migrations.py` sencillo como en Horarios (o Alembic si se justifica).
 - Script `seed` con datos de ejemplo: sedes, categorías, horarios, 2 admins y un profesor.
 

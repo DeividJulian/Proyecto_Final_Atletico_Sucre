@@ -13,7 +13,7 @@ services:
       # Strict mode: ADMIN_PASSWORD_INICIAL required, no test accounts
       - key: ENVIRONMENT
         value: production
-      # Supabase connection pooler URI (postgresql+psycopg://...:6543/postgres), entered in Render
+      # Supabase *Session pooler* URI (postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres)
       - key: DATABASE_URL
         sync: false
       # Signs the session tokens; Render generates a random value once

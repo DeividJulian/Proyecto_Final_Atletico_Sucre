@@ -11,8 +11,12 @@ def _engine_options(url: str) -> dict:
     if url.startswith("sqlite"):
         # FastAPI serves requests from a thread pool; SQLite needs this to share the connection
         return {"connect_args": {"check_same_thread": False}}
-    # Supabase pooler (PgBouncer, transaction mode): check connections before use and skip prepared statements
-    return {"pool_pre_ping": True, "pool_recycle": 300, "connect_args": {"prepare_threshold": None}}
+    if url.startswith("postgresql"):
+        # Supabase Session pooler (port 5432). pool_pre_ping discards connections the pooler closed while Render
+        # slept; prepare_threshold=None turns off psycopg's server-side prepared statements, so the app also
+        # works if the URL is ever switched to a pooler that does not support them (transaction mode).
+        return {"pool_pre_ping": True, "pool_recycle": 300, "connect_args": {"prepare_threshold": None}}
+    return {"pool_pre_ping": True}
 
 
 engine = create_engine(config.DATABASE_URL, **_engine_options(config.DATABASE_URL))

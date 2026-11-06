@@ -11,6 +11,26 @@ def test_only_two_admins_from_admin_emails(client):
         assert all(a.must_change_password for a in admins)
 
 
+def test_restart_does_not_reset_admin_password(client, admin_token):
+    """After the admin changes the password, a restart (ensure_admins again) must keep the new one."""
+    from main import init_database
+
+    changed = client.post(
+        "/auth/password/change",
+        headers=auth(admin_token),
+        json={"current_password": "AdminPass123", "new_password": "MiNuevaClave2026"},
+    )
+    assert changed.status_code == 200
+
+    init_database()  # what Render does on every start
+    init_database()
+
+    assert client.post("/auth/login", json={"email": "admin1@test.com", "password": "AdminPass123"}).status_code == 401
+    me = client.get("/auth/me", headers=auth(login(client, "admin1@test.com", "MiNuevaClave2026"))).json()
+    assert me["is_admin"] is True
+    assert me["must_change_password"] is False  # not raised again by the restart
+
+
 def test_admin_is_coach_check_constraint(client):
     import pytest
     from sqlalchemy.exc import IntegrityError
