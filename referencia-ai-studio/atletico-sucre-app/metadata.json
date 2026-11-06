@@ -1,0 +1,6 @@
+{
+  "name": "Atlético Sucre - Control de Pagos y Mensualidades",
+  "description": "Club Deportivo Atlético Sucre: Enseñamos de corazón a corazón. Sistema de control de pagos de mensualidad, recordatorios semanales y carga de comprobantes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
