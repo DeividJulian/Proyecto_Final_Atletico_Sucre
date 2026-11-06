@@ -1,0 +1,53 @@
+<section id="app" class="section section--dark app" aria-labelledby="app-title">
+  <div class="container app__grid">
+    <div>
+      <p class="eyebrow">Descarga nuestra app</p>
+      <h2 id="app-title" class="section-title">El club en tu bolsillo</h2>
+      <p class="lead">
+        Consulta la categoría, el horario y la sede de tus hijos, su asistencia, el estado de pagos y los avisos del
+        club desde tu celular.
+      </p>
+
+      @if (store.appRelease(); as release) {
+        <div class="app__release">
+          <a class="btn btn--gold" [href]="release.apk_url" download rel="noopener">⬇ Descargar APK para Android</a>
+          <p class="app__version">
+            Versión {{ release.version }} · {{ release.released_at | date: 'longDate' : '' : 'es-CO' }}
+            @if (release.min_android) {
+              · Android {{ release.min_android }} o superior
+            }
+          </p>
+          @if (release.release_notes) {
+            <p class="app__notes">{{ release.release_notes }}</p>
+          }
+        </div>
+      } @else if (store.loading()) {
+        <div class="skeleton app__skeleton" aria-busy="true"></div>
+      } @else {
+        <p class="notice app__soon">📱 La app está en camino. Muy pronto podrás descargarla aquí.</p>
+      }
+
+      <h3 class="app__subtitle">Cómo instalarla en Android</h3>
+      <ol class="app__steps">
+        @for (step of steps; track step) {
+          <li>{{ step }}</li>
+        }
+      </ol>
+      <p class="app__safe">La app solo se descarga desde esta página oficial del club.</p>
+    </div>
+
+    <div class="app__visual">
+      @if (qr(); as code) {
+        <figure class="app__qr">
+          <img [src]="code" alt="Código QR para descargar la app del Club Atlético Sucre" width="220" height="220" />
+          <figcaption>Escanéalo con la cámara de tu celular</figcaption>
+        </figure>
+      } @else {
+        <div class="app__phone" aria-hidden="true">
+          <img src="/img/escudo-256.png" alt="" width="120" height="120" />
+          <span>Atlético Sucre</span>
+        </div>
+      }
+    </div>
+  </div>
+</section>

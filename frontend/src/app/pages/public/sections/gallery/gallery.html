@@ -1,0 +1,64 @@
+<section id="galeria" class="section" aria-labelledby="gallery-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Noticias y galería</p>
+      <h2 id="gallery-title" class="section-title">La familia Atlético Sucre</h2>
+      <p class="lead">Más que jugadores, somos una familia. Así vivimos cada entrenamiento y cada partido.</p>
+    </div>
+
+    @if (store.news().length) {
+      <h3 class="gallery__subtitle">Noticias</h3>
+      <ul class="news" role="list">
+        @for (item of store.news(); track item.id) {
+          <li class="card news__item">
+            @if (item.cover_url) {
+              <img class="news__cover" [src]="item.cover_url" [alt]="item.title" loading="lazy" />
+            }
+            <time class="news__date" [attr.datetime]="item.published_at">{{ item.published_at | date: 'longDate' : '' : 'es-CO' }}</time>
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.summary }}</p>
+            @if (expanded() === item.id) {
+              <p class="news__body">{{ item.body }}</p>
+            }
+            <button type="button" class="news__more" [attr.aria-expanded]="expanded() === item.id" (click)="toggleNews(item)">
+              {{ expanded() === item.id ? 'Mostrar menos' : 'Leer más' }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="strip" role="region" aria-label="Galería de fotos (desliza para ver más)" tabindex="0">
+      <figure class="strip__item strip__item--video">
+        <video
+          src="/media/entrenamiento.mp4"
+          poster="/media/entrenamiento.jpg"
+          muted
+          loop
+          playsinline
+          controls
+          preload="none"
+          aria-label="Video de un entrenamiento"
+        ></video>
+        <figcaption><strong>Entrenamiento</strong><span>Metodología profesional</span></figcaption>
+      </figure>
+      @if (store.loading()) {
+        @for (n of [1, 2, 3]; track n) {
+          <div class="strip__item skeleton"></div>
+        }
+      }
+      @for (item of store.gallery(); track item.id) {
+        <figure class="strip__item">
+          <img [src]="item.media_url" [alt]="item.title" loading="lazy" />
+          <figcaption>
+            <strong>{{ item.title }}</strong>
+            @if (item.caption) {
+              <span>{{ item.caption }}</span>
+            }
+          </figcaption>
+        </figure>
+      }
+    </div>
+    <p class="gallery__hint">Desliza para ver más fotos →</p>
+  </div>
+</section>

@@ -1,0 +1,42 @@
+<section id="nosotros" class="section section--white" aria-labelledby="about-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Quiénes somos</p>
+      <h2 id="about-title" class="section-title">Más que un club, una familia</h2>
+      <p class="lead">{{ about.integral }}</p>
+    </div>
+
+    <div class="about__grid">
+      <article class="card about__philosophy">
+        <h3>{{ about.philosophyTitle }}</h3>
+        <p>{{ about.philosophy }}</p>
+        <p class="about__motto">"{{ club.motto }}"</p>
+      </article>
+
+      <article class="card about__coach">
+        <h3>{{ about.coachTitle }}</h3>
+        <p>{{ about.coach }}</p>
+      </article>
+    </div>
+
+    <h3 class="about__subtitle">Nuestros valores</h3>
+    <ul class="about__values" role="list">
+      @for (value of values; track value.title) {
+        <li class="about__value">
+          <span class="about__icon" aria-hidden="true">{{ value.icon }}</span>
+          <strong>{{ value.title }}</strong>
+          <span>{{ value.text }}</span>
+        </li>
+      }
+    </ul>
+
+    <div class="about__duties card">
+      <h3>Deberes de las familias</h3>
+      <ul role="list">
+        @for (duty of duties; track duty) {
+          <li>{{ duty }}</li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>

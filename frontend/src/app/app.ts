@@ -1,8 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
+import { ConnectionStatus } from './shared/connection-status/connection-status';
+import { NavBar } from './shared/nav-bar/nav-bar';
+import { SiteFooter } from './shared/site-footer/site-footer';
+import { WhatsappFab } from './shared/whatsapp-fab/whatsapp-fab';
+
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NavBar, SiteFooter, WhatsappFab, ConnectionStatus],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',

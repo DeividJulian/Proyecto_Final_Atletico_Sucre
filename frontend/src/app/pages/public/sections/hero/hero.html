@@ -1,0 +1,40 @@
+<section id="inicio" class="hero" aria-labelledby="hero-title">
+  <div class="container hero__grid">
+    <div class="hero__text">
+      <p class="hero__kicker">⚽ Escuela de fútbol · {{ club.city }}</p>
+      <h1 id="hero-title" class="hero__title">
+        <span>Atlético</span>
+        <span class="hero__title-accent">Sucre</span>
+      </h1>
+      <p class="hero__nickname">{{ club.nickname }}</p>
+
+      <div class="hero__stat">
+        <strong>{{ club.years }}+</strong>
+        <span>años formando niñas y niños {{ club.ages }}</span>
+      </div>
+
+      <p class="hero__motto">"{{ club.motto }}"</p>
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" routerLink="/registro">Inscribe a tu hijo</a>
+        <a class="btn btn--whatsapp" [href]="whatsappUrl()" target="_blank" rel="noopener noreferrer">Escríbenos por WhatsApp</a>
+      </div>
+    </div>
+
+    <div class="hero__media">
+      <video
+        class="hero__video"
+        src="/media/video-presentacion.mp4"
+        poster="/media/video-presentacion.jpg"
+        [autoplay]="autoplay"
+        [muted]="true"
+        loop
+        playsinline
+        controls
+        preload="metadata"
+        aria-label="Video de presentación del Club Atlético Sucre"
+      ></video>
+      <img class="hero__badge" src="/img/escudo-256.png" alt="" width="96" height="96" />
+    </div>
+  </div>
+</section>

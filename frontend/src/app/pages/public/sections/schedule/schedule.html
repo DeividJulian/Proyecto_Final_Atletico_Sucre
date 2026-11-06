@@ -1,0 +1,93 @@
+<section id="horarios" class="section" aria-labelledby="schedule-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Horarios y sedes</p>
+      <h2 id="schedule-title" class="section-title">Entrena sin descuidar el colegio</h2>
+      <p class="lead">
+        Dos jornadas para que el fútbol se acomode a tus estudios: entrena en la jornada contraria a la del colegio.
+      </p>
+    </div>
+
+    @if (store.categories().length) {
+      <div class="chips" role="group" aria-label="Filtrar horario por categoría">
+        <button type="button" class="chip" [attr.aria-pressed]="selectedCategory() === null" (click)="select(null)">
+          Todas
+        </button>
+        @for (category of store.categories(); track category.id) {
+          <button
+            type="button"
+            class="chip"
+            [attr.aria-pressed]="selectedCategory() === category.id"
+            (click)="select(category.id)"
+          >
+            {{ category.name.replace('Categoría ', '') }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (store.loading()) {
+      <div class="schedule__grid" aria-busy="true">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+    } @else {
+      <div class="schedule__grid">
+        @for (block of blocks(); track block.shift) {
+          <article class="card schedule__card" [class.schedule__card--afternoon]="block.shift === 'afternoon'">
+            <header class="schedule__head">
+              <span class="schedule__icon" aria-hidden="true">{{ block.shift === 'morning' ? '☀️' : '🌙' }}</span>
+              <div>
+                <h3>{{ block.title }}</h3>
+                <p>{{ block.hint }}</p>
+              </div>
+            </header>
+            @if (block.slots.length) {
+              <ul class="schedule__slots" role="list">
+                @for (slot of block.slots; track slot.weekday + slot.start) {
+                  <li>
+                    <span class="schedule__day">{{ slot.weekdayName }}</span>
+                    <span class="schedule__time">{{ time(slot.start) }} – {{ time(slot.end) }}</span>
+                    <span class="schedule__venue">📍 {{ slot.venues.join(' · ') }}</span>
+                    @if (slot.shift === 'all') {
+                      <span class="badge">Ambas jornadas</span>
+                    }
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="notice">No hay entrenamientos en esta jornada para la categoría elegida.</p>
+            }
+          </article>
+        }
+      </div>
+    }
+
+    <h3 class="schedule__subtitle" id="sedes">Nuestras sedes</h3>
+    @if (store.loading()) {
+      <div class="venues__grid" aria-busy="true">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+    } @else {
+      <ul class="venues__grid" role="list">
+        @for (venue of store.venues(); track venue.id) {
+          <li class="card venue" [class.venue--main]="venue.is_main">
+            <span class="badge" [class.badge--red]="venue.is_main">{{ venue.is_main ? 'Sede principal' : 'Sede alterna' }}</span>
+            <h4>{{ venue.name }}</h4>
+            @if (venue.surface) {
+              <p class="venue__surface">{{ venue.surface }}</p>
+            }
+            @if (venue.description) {
+              <p>{{ venue.description }}</p>
+            }
+            <a class="btn btn--outline venue__map" [href]="maps(venue)" target="_blank" rel="noopener noreferrer">
+              Ver en Google Maps
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

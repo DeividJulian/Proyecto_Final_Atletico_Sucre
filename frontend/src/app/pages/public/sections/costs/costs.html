@@ -1,0 +1,67 @@
+<section id="costos" class="section section--white" aria-labelledby="costs-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Costos, pagos y uniformes</p>
+      <h2 id="costs-title" class="section-title">Claros desde el primer día</h2>
+    </div>
+
+    @if (store.club(); as club) {
+      <div class="costs__grid">
+        <article class="price">
+          <span class="badge">Pago único</span>
+          <h3>Inscripción</h3>
+          <p class="price__value">{{ cop(club.enrollment_fee) }}</p>
+          <p class="price__note">Se paga una sola vez, al matricularse.</p>
+        </article>
+        <article class="price price--main">
+          <span class="badge badge--red">Mensual</span>
+          <h3>Mensualidad</h3>
+          <p class="price__value">{{ cop(club.monthly_fee) }}</p>
+          <p class="price__note">Se paga los primeros días del mes (hasta el día {{ club.due_day }}).</p>
+          @if (club.sibling_discount_percent > 0) {
+            <p class="price__note">Hermanos: {{ club.sibling_discount_percent }} % de descuento.</p>
+          }
+        </article>
+        <article class="card payment">
+          <h3>Formas de pago</h3>
+          <p class="payment__methods">💵 {{ club.payment_methods.join(' o ') }}</p>
+          @if (club.nequi_number) {
+            <p>
+              <strong>Nequi:</strong> {{ phone(club.nequi_number) }}<br />
+              <span>A nombre de {{ club.nequi_holder }}</span>
+            </p>
+          } @else {
+            <p>{{ club.payment_contact_message }}</p>
+            <a class="btn btn--whatsapp" [href]="paymentQuestion()" target="_blank" rel="noopener noreferrer">
+              Consultar por WhatsApp
+            </a>
+          }
+          <p class="notice payment__warning">⚠️ Hay que estar al día con la mensualidad para continuar entrenando.</p>
+        </article>
+      </div>
+    } @else {
+      <div class="costs__grid" aria-busy="true">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+    }
+
+    <h3 class="costs__subtitle">Uniformes oficiales</h3>
+    <ul class="uniforms" role="list">
+      @for (item of uniforms; track item.title) {
+        <li class="uniform">
+          <img [src]="item.image" [alt]="item.title + ': ' + item.description" loading="lazy" width="400" height="400" />
+          <div class="uniform__body">
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.description }}</p>
+            <strong>{{ cop(item.price) }}</strong>
+          </div>
+        </li>
+      }
+    </ul>
+    <p class="notice">
+      👕 Los uniformes se adquieren en <strong>{{ store.club()?.uniform_store ?? 'Liga Mundial — Calle 24 # 6-91, Ipiales' }}</strong>.
+    </p>
+  </div>
+</section>

@@ -1,0 +1,43 @@
+<header class="nav">
+  <div class="nav__bar container">
+    <a class="nav__brand" routerLink="/" fragment="inicio" (click)="close()" aria-label="Club Atlético Sucre, ir al inicio">
+      <img src="/img/escudo-128.png" alt="" width="44" height="44" />
+      <span class="nav__name">
+        <strong>Atlético Sucre</strong>
+        <small>Embajadores del Sur</small>
+      </span>
+    </a>
+
+    <nav class="nav__links" aria-label="Secciones">
+      @for (link of desktopLinks; track link.fragment) {
+        <a routerLink="/" [fragment]="link.fragment" [attr.title]="link.label">{{ link.short }}</a>
+      }
+    </nav>
+
+    <div class="nav__actions">
+      <a class="btn btn--outline nav__login" routerLink="/ingresar">Ingresar</a>
+      <a class="btn btn--primary nav__cta" routerLink="/registro">Inscribe a tu hijo</a>
+    </div>
+
+    <button
+      type="button"
+      class="nav__toggle"
+      [attr.aria-expanded]="open()"
+      aria-controls="menu-movil"
+      (click)="toggle()"
+    >
+      <span class="visually-hidden">{{ open() ? 'Cerrar menú' : 'Abrir menú' }}</span>
+      <span class="nav__burger" [class.nav__burger--open]="open()" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <nav id="menu-movil" class="nav__drawer" [class.nav__drawer--open]="open()" aria-label="Menú" [attr.inert]="open() ? null : ''">
+    @for (link of links; track link.fragment) {
+      <a routerLink="/" [fragment]="link.fragment" (click)="close()">{{ link.label }}</a>
+    }
+    <div class="nav__drawer-actions">
+      <a class="btn btn--primary btn--block" routerLink="/registro" (click)="close()">Inscribe a tu hijo</a>
+      <a class="btn btn--outline btn--block" routerLink="/ingresar" (click)="close()">Ingresar</a>
+    </div>
+  </nav>
+</header>

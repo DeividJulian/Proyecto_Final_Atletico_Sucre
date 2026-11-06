@@ -1,0 +1,53 @@
+<section id="categorias" class="section section--dark" aria-labelledby="categories-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Categorías y metodología</p>
+      <h2 id="categories-title" class="section-title">Un lugar para cada edad</h2>
+      <p class="lead">
+        La categoría se asigna según el año de nacimiento. Al inscribir a tu hijo, la plataforma la calcula
+        automáticamente.
+      </p>
+    </div>
+
+    @if (store.loading()) {
+      <div class="categories__grid" aria-busy="true">
+        @for (n of [1, 2, 3, 4]; track n) {
+          <div class="skeleton"></div>
+        }
+      </div>
+    } @else if (store.categories().length) {
+      <ul class="categories__grid" role="list">
+        @for (category of mixed(); track category.id) {
+          <li class="categories__card">
+            <span class="categories__years">{{ category.name.replace('Categoría ', '') }}</span>
+            <strong>{{ years(category) }}</strong>
+            <span class="categories__age">{{ ages(category) }}</span>
+            @if (category.description) {
+              <p>{{ category.description }}</p>
+            }
+          </li>
+        }
+        @for (category of female(); track category.id) {
+          <li class="categories__card categories__card--female">
+            <span class="categories__years">{{ category.name }}</span>
+            <strong>Equipo femenino</strong>
+            <span class="categories__age">{{ ages(category) }} · talento y pasión sin límites</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="notice">Las categorías se mostrarán en cuanto el servidor responda.</p>
+    }
+
+    <h3 class="categories__subtitle">Metodología</h3>
+    <ul class="categories__pillars" role="list">
+      @for (pillar of pillars; track pillar.title) {
+        <li class="card">
+          <span class="categories__icon" aria-hidden="true">{{ pillar.icon }}</span>
+          <h4>{{ pillar.title }}</h4>
+          <p>{{ pillar.text }}</p>
+        </li>
+      }
+    </ul>
+  </div>
+</section>

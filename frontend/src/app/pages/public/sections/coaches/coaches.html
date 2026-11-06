@@ -1,0 +1,83 @@
+<section id="cuerpo-tecnico" class="section section--dark" aria-labelledby="coaches-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Cuerpo técnico</p>
+      <h2 id="coaches-title" class="section-title">Formadores y coach de rendimiento</h2>
+      <p class="lead">{{ about.coach }}</p>
+    </div>
+
+    @if (store.loading()) {
+      <div class="coaches__grid" aria-busy="true">
+        @for (n of [1, 2, 3]; track n) {
+          <div class="skeleton"></div>
+        }
+      </div>
+    } @else {
+      @if (president(); as boss) {
+        <article class="president">
+          <p class="president__ribbon">🏆 {{ boss.role_title }}</p>
+          <div class="president__body">
+            <img
+              class="president__photo"
+              [src]="boss.photo_url"
+              [style.object-position]="boss.photo_position"
+              [alt]="'Foto de ' + boss.full_name"
+              width="140"
+              height="140"
+              loading="lazy"
+            />
+            <div>
+              <h3>{{ boss.full_name }}</h3>
+              <ul class="credentials" role="list">
+                @for (item of boss.credentials; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        </article>
+      }
+
+      <ul class="coaches__grid" role="list">
+        @for (coach of staff(); track coach.id) {
+          <li class="coach" [class.coach--open]="openId() === coach.id">
+            <button
+              type="button"
+              class="coach__toggle"
+              [attr.aria-expanded]="openId() === coach.id"
+              [attr.aria-controls]="'coach-' + coach.id"
+              (click)="toggle(coach)"
+            >
+              @if (coach.photo_url) {
+                <img
+                  class="coach__photo"
+                  [src]="coach.photo_url"
+                  [style.object-position]="coach.photo_position"
+                  alt=""
+                  width="88"
+                  height="88"
+                  loading="lazy"
+                />
+              } @else {
+                <span class="coach__photo coach__initials" aria-hidden="true">{{ initials(coach) }}</span>
+              }
+              <span class="coach__name">{{ shortName(coach) }}</span>
+              <span class="coach__role">{{ coach.role_title }}</span>
+              <span class="coach__more">{{ openId() === coach.id ? 'Ocultar perfil ▲' : 'Ver perfil ▼' }}</span>
+            </button>
+            <div [id]="'coach-' + coach.id" class="coach__details" [hidden]="openId() !== coach.id">
+              <p class="coach__full">{{ coach.full_name }}</p>
+              <ul class="credentials" role="list">
+                @for (item of coach.credentials; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    <p class="coaches__motto">{{ club.motto }}</p>
+  </div>
+</section>

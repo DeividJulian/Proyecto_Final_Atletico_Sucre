@@ -1,0 +1,98 @@
+.app {
+  background:
+    radial-gradient(circle at 90% 20%, rgb(212 160 23 / 0.18), transparent 45%),
+    var(--color-black);
+}
+
+.app__grid {
+  display: grid;
+  gap: 32px;
+}
+
+.app__release {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+.app__version {
+  margin: 0;
+  color: #cfcbc2;
+  font-size: 0.9rem;
+}
+.app__notes {
+  margin: 0;
+  white-space: pre-line;
+  color: #e3dfd6;
+}
+.app__skeleton {
+  min-height: 60px;
+  max-width: 320px;
+}
+.app__soon {
+  color: var(--color-ink);
+}
+
+.app__subtitle {
+  margin-top: 28px;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+}
+.app__steps {
+  margin: 0;
+  padding-left: 22px;
+  display: grid;
+  gap: 8px;
+  color: #e3dfd6;
+}
+.app__safe {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: #a7a39a;
+}
+
+.app__visual {
+  display: grid;
+  place-items: center;
+}
+.app__qr {
+  margin: 0;
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  color: var(--color-ink);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+.app__qr figcaption {
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+.app__phone {
+  width: 200px;
+  height: 380px;
+  border-radius: 36px;
+  border: 8px solid #2b2b2b;
+  background: linear-gradient(170deg, var(--color-red-dark), var(--color-black) 70%);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.6);
+}
+.app__phone img {
+  border-radius: 50%;
+}
+.app__phone span {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  letter-spacing: 0.08em;
+}
+
+@media (min-width: 900px) {
+  .app__grid {
+    grid-template-columns: 1.3fr 1fr;
+    align-items: center;
+  }
+}

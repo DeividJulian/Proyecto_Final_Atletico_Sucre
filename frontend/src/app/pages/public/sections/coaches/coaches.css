@@ -1,0 +1,164 @@
+.president {
+  border: 2px solid var(--color-gold);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f1a0d, #121212 60%);
+  margin-bottom: 24px;
+}
+.president__ribbon {
+  margin: 0;
+  padding: 10px 16px;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--color-gold);
+  color: var(--color-black);
+}
+.president__body {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  padding: 24px 20px;
+  text-align: center;
+}
+.president__body h3 {
+  font-size: 1.6rem;
+  text-transform: uppercase;
+}
+.president__photo {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid var(--color-gold);
+}
+
+.credentials {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  color: #d9d5cc;
+  font-size: 0.92rem;
+}
+.credentials li {
+  position: relative;
+  padding-left: 20px;
+}
+.credentials li::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  color: var(--color-gold);
+}
+
+.coaches__grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.coach {
+  border-radius: var(--radius-md);
+  background: #1d1d1d;
+  border: 1px solid #333;
+  overflow: hidden;
+}
+.coach--open {
+  grid-column: 1 / -1;
+  border-color: var(--color-gold);
+}
+.coach__toggle {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 18px 10px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.coach--open .coach__toggle {
+  background: linear-gradient(160deg, var(--color-red-dark), #3a0806);
+}
+.coach__photo {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--color-red);
+}
+.coach--open .coach__photo {
+  border-color: var(--color-gold);
+}
+.coach__initials {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  background: #2b2b2b;
+}
+.coach__name {
+  font-weight: 700;
+  margin-top: 6px;
+}
+.coach__role {
+  font-size: 0.82rem;
+  color: var(--color-gold-light);
+}
+.coach__more {
+  font-size: 0.78rem;
+  color: #a7a39a;
+  margin-top: 4px;
+}
+.coach__details {
+  padding: 16px 18px 20px;
+}
+.coach__full {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  color: var(--color-white);
+}
+
+.coaches__motto {
+  margin: 40px 0 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 4.5vw, 1.8rem);
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+}
+
+@media (min-width: 768px) {
+  .president__body {
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    text-align: left;
+    padding: 28px 32px;
+    gap: 28px;
+  }
+  .coaches__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .credentials {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .coaches__grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,47 @@
+<section id="contacto" class="section section--white" aria-labelledby="contact-title">
+  <div class="container contact">
+    <div>
+      <p class="eyebrow">Contacto</p>
+      <h2 id="contact-title" class="section-title">¿Listo para ser parte del club?</h2>
+      <p class="lead">
+        Inscribe a tu hijo en línea o escríbenos por WhatsApp. Te respondemos sobre categorías, horarios, sedes y pagos.
+      </p>
+      <div class="contact__actions">
+        <a class="btn btn--primary" routerLink="/registro">Inscribe a tu hijo en línea</a>
+        <a class="btn btn--whatsapp" [href]="enrollUrl()" target="_blank" rel="noopener noreferrer">
+          WhatsApp {{ phone() }}
+        </a>
+      </div>
+    </div>
+
+    <ul class="contact__list card" role="list">
+      <li>
+        <span aria-hidden="true">📱</span>
+        <div>
+          <strong>WhatsApp</strong>
+          <a [href]="whatsappUrl()" target="_blank" rel="noopener noreferrer">+57 {{ phone() }}</a>
+        </div>
+      </li>
+      <li>
+        <span aria-hidden="true">📍</span>
+        <div>
+          <strong>Ipiales, Nariño</strong>
+          <span class="contact__venues">
+            @for (venue of store.venues(); track venue.id; let last = $last) {
+              <a [href]="maps(venue)" target="_blank" rel="noopener noreferrer">{{ venue.name }}</a>{{ last ? '' : ' · ' }}
+            } @empty {
+              Cancha Grupo Cabal · Colegio Champagnat · Colegio Seminario
+            }
+          </span>
+        </div>
+      </li>
+      <li>
+        <span aria-hidden="true">👕</span>
+        <div>
+          <strong>Uniformes</strong>
+          <span>{{ store.club()?.uniform_store ?? 'Liga Mundial — Calle 24 # 6-91, Ipiales' }}</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>

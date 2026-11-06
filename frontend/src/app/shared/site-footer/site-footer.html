@@ -1,0 +1,36 @@
+<footer class="footer">
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <img src="/img/escudo-256.png" alt="Escudo del Club de Fútbol Atlético Sucre" width="88" height="88" loading="lazy" />
+      <div>
+        <p class="footer__name">{{ club.name }}</p>
+        <p class="footer__line">"{{ club.footerLine }}"</p>
+        <p class="footer__motto">{{ club.heart }} ❤️</p>
+      </div>
+    </div>
+
+    <nav class="footer__links" aria-label="Enlaces del pie de página">
+      @for (link of links; track link.fragment) {
+        <a routerLink="/" [fragment]="link.fragment">{{ link.label }}</a>
+      }
+    </nav>
+
+    <div class="footer__contact">
+      <a class="btn btn--whatsapp" [href]="whatsappUrl()" target="_blank" rel="noopener noreferrer">WhatsApp {{ phone() }}</a>
+      <p>{{ club.city }}, Colombia</p>
+      <button type="button" class="footer__policy" (click)="openPolicy()">Tratamiento de datos personales</button>
+    </div>
+  </div>
+  <p class="footer__copy">© {{ year }} {{ club.name }} · Ipiales, Nariño · Todos los derechos reservados</p>
+</footer>
+
+<dialog #policy class="policy" aria-labelledby="policy-title">
+  <h2 id="policy-title">Tratamiento de datos personales</h2>
+  @if (store.club(); as data) {
+    <p class="policy__version">Ley 1581 de 2012 · versión {{ data.data_policy_version }}</p>
+    <p>{{ data.data_policy_text }}</p>
+  } @else {
+    <p>Estamos cargando la política del club…</p>
+  }
+  <button type="button" class="btn btn--primary" (click)="closePolicy()">Cerrar</button>
+</dialog>
