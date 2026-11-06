@@ -1,0 +1,92 @@
+<a class="back" routerLink="/profesor/categorias">← Mis categorías</a>
+
+@if (error(); as message) {
+  <p class="alert">{{ message }}</p>
+} @else if (player(); as p) {
+  <header class="card head">
+    <app-private-photo [source]="photoLoader()" [initials]="initials(p)" [alt]="'Foto de ' + p.first_names" imgClass="head__photo" />
+    <div>
+      <h2>{{ p.full_name }}</h2>
+      <p class="field-hint">{{ p.category?.name }} · {{ p.age }} años · {{ label('trainingShift', p.training_shift) }}</p>
+      @if (account(); as a) {
+        <span class="pill" [class]="'pill ' + (a.is_up_to_date ? 'pill--paid' : 'pill--overdue')">
+          {{ a.is_up_to_date ? 'Al día con el club' : 'Pagos pendientes' }}
+        </span>
+      }
+    </div>
+  </header>
+
+  <div class="grid two">
+    <section class="card health">
+      <h3>Salud y emergencia</h3>
+      <dl class="data-list">
+        <div><dt>EPS / RH</dt><dd>{{ p.health.eps }} · {{ p.health.blood_type ?? '—' }}</dd></div>
+        <div><dt>Alergias</dt><dd>{{ p.health.allergies ?? 'Ninguna registrada' }}</dd></div>
+        <div><dt>Condiciones médicas</dt><dd>{{ p.health.medical_notes ?? 'Ninguna registrada' }}</dd></div>
+        <div><dt>Emergencia</dt><dd>{{ p.health.emergency_contact_name }} · <a [href]="'tel:+57' + p.health.emergency_contact_phone">{{ phone(p.health.emergency_contact_phone) }}</a></dd></div>
+        <div><dt>Acudiente</dt><dd>{{ p.guardian.full_name }} ({{ label('relationship', p.guardian.relationship_to_player) }}) · <a [href]="'tel:+57' + p.guardian.phone">{{ phone(p.guardian.phone) }}</a></dd></div>
+      </dl>
+    </section>
+
+    <form class="card" [formGroup]="sports" (ngSubmit)="saveSports()" novalidate>
+      <h3>Dorsal y posición</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label for="jersey">Número de camiseta</label>
+          <input id="jersey" type="number" min="1" max="99" formControlName="jersey_number" />
+          <app-field-error [control]="sports.controls.jersey_number" />
+        </div>
+        <div class="field">
+          <label for="position">Posición</label>
+          <select id="position" formControlName="position">
+            <option [ngValue]="null">Sin definir</option>
+            @for (option of positions; track option.value) {
+              <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="savingSports()">{{ savingSports() ? 'Guardando…' : 'Guardar' }}</button>
+      </div>
+    </form>
+  </div>
+
+  <section class="card">
+    <h3>Observaciones de rendimiento</h3>
+    <form [formGroup]="noteForm" (ngSubmit)="addNote()" novalidate class="note-form">
+      <div class="field">
+        <label for="note">Nueva observación</label>
+        <textarea id="note" rows="3" formControlName="content" placeholder="Ej. Mejoró mucho la conducción con pierna izquierda."></textarea>
+        <app-field-error [control]="noteForm.controls.content" />
+      </div>
+      <label class="check">
+        <input type="checkbox" formControlName="visible_to_guardian" />
+        <span>Visible para el acudiente en su panel</span>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="savingNote()">{{ savingNote() ? 'Guardando…' : 'Registrar observación' }}</button>
+      </div>
+    </form>
+
+    @if (notes().length) {
+      <ul class="notes" role="list">
+        @for (note of notes(); track note.id) {
+          <li>
+            <div class="notes__meta">
+              <time>{{ note.note_date | date: 'longDate' }}</time>
+              <span class="pill" [class]="'pill ' + (note.visible_to_guardian ? 'pill--approved' : 'pill--upcoming')">
+                {{ note.visible_to_guardian ? 'Visible al acudiente' : 'Solo profesores' }}
+              </span>
+            </div>
+            <p>{{ note.content }}</p>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="empty">Todavía no hay observaciones.</p>
+    }
+  </section>
+} @else {
+  <div class="skeleton"></div>
+}

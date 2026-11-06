@@ -1,0 +1,75 @@
+:host {
+  display: grid;
+  gap: 16px;
+}
+.back {
+  font-weight: 600;
+  text-decoration: none;
+}
+.head {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+:host ::ng-deep .head__photo {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--color-gold);
+  flex-shrink: 0;
+}
+.head h2 {
+  font-size: 1.4rem;
+  margin: 0 0 4px;
+}
+.head .field-hint {
+  margin-bottom: 6px;
+}
+.card h3 {
+  font-size: 1.15rem;
+  text-transform: uppercase;
+}
+.grid.two {
+  display: grid;
+  gap: 16px;
+}
+.health {
+  border-left: 5px solid var(--color-red);
+}
+.note-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.notes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.notes li {
+  padding: 12px 0;
+  border-top: 1px solid var(--color-gray-100);
+}
+.notes__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--color-gray-500);
+}
+.notes p {
+  margin: 6px 0 0;
+  white-space: pre-line;
+}
+
+@media (min-width: 960px) {
+  .grid.two {
+    grid-template-columns: 1.3fr 1fr;
+    align-items: start;
+  }
+  .health .data-list {
+    grid-template-columns: 1fr;
+  }
+}

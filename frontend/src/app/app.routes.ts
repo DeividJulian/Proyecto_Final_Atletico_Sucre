@@ -71,20 +71,87 @@ export const routes: Routes = [
     ],
   },
 
-  // ---------- coach and admin panels (Fase 5, parte B)
+  // ---------- coach panel (admins too: an admin is a coach with extra permissions)
   {
     path: 'profesor',
-    title: `Panel del profesor · ${TITLE}`,
-    canActivate: [roleGuard('coach')],
-    data: { title: 'Panel del profesor' },
-    loadComponent: () => import('./pages/panel-placeholder/panel-placeholder').then((m) => m.PanelPlaceholder),
+    canActivate: [roleGuard('coach', 'admin')],
+    loadComponent: () => import('./pages/profesor/coach-layout').then((m) => m.CoachLayout),
+    children: [
+      {
+        path: '',
+        title: `Asistencia · ${TITLE}`,
+        loadComponent: () => import('./pages/profesor/attendance/attendance').then((m) => m.CoachAttendance),
+      },
+      {
+        path: 'categorias',
+        title: `Mis categorías · ${TITLE}`,
+        loadComponent: () => import('./pages/profesor/categories/coach-categories').then((m) => m.CoachCategories),
+      },
+      {
+        path: 'deportistas/:id',
+        title: `Deportista · ${TITLE}`,
+        loadComponent: () => import('./pages/profesor/player/coach-player').then((m) => m.CoachPlayer),
+      },
+      {
+        path: 'avisos',
+        title: `Avisos · ${TITLE}`,
+        loadComponent: () => import('./shared/announcements-manager/announcements-manager').then((m) => m.AnnouncementsManager),
+      },
+    ],
   },
+
+  // ---------- admin panel
   {
     path: 'admin',
-    title: `Administración · ${TITLE}`,
     canActivate: [roleGuard('admin')],
-    data: { title: 'Panel de administración' },
-    loadComponent: () => import('./pages/panel-placeholder/panel-placeholder').then((m) => m.PanelPlaceholder),
+    loadComponent: () => import('./pages/admin/admin-layout').then((m) => m.AdminLayout),
+    children: [
+      {
+        path: '',
+        title: `Administración · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/dashboard/dashboard').then((m) => m.AdminDashboard),
+      },
+      {
+        path: 'inscripciones',
+        title: `Inscripciones · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/enrollments/enrollments').then((m) => m.AdminEnrollments),
+      },
+      {
+        path: 'deportistas',
+        title: `Deportistas · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/players/admin-players').then((m) => m.AdminPlayers),
+      },
+      {
+        path: 'pagos',
+        title: `Pagos · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/payments/admin-payments').then((m) => m.AdminPayments),
+      },
+      {
+        path: 'profesores',
+        title: `Profesores · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/coaches/admin-coaches').then((m) => m.AdminCoaches),
+      },
+      {
+        path: 'catalogo',
+        title: `Categorías y horarios · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/catalog/admin-catalog').then((m) => m.AdminCatalog),
+      },
+      {
+        path: 'contenido',
+        title: `Noticias y galería · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/content/admin-content').then((m) => m.AdminContent),
+      },
+      {
+        path: 'avisos',
+        title: `Avisos · ${TITLE}`,
+        loadComponent: () => import('./shared/announcements-manager/announcements-manager').then((m) => m.AnnouncementsManager),
+      },
+      {
+        path: 'ajustes',
+        title: `Ajustes y app · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/settings/admin-settings').then((m) => m.AdminSettings),
+      },
+    ],
   },
 
   { path: '**', redirectTo: '' },

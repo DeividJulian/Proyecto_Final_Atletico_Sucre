@@ -1,0 +1,29 @@
+:host {
+  display: grid;
+  gap: 16px;
+}
+h3 {
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  margin: 8px 0 12px;
+}
+form h3:not(:first-child) {
+  margin-top: 24px;
+}
+.releases {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+.releases li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-gray-100);
+}
+.releases .btn {
+  min-height: 38px;
+  padding: 6px 14px;
+}

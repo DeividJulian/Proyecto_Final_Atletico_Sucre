@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from enums import EnrollmentStatus
+from enums import EnrollmentStatus, TrainingShift
 from models import Announcement, Attendance, PerformanceNote, TrainingSession, User
 from policies import AccessPolicy
 from repositories import (
@@ -15,6 +15,7 @@ from repositories import (
 )
 from schemas import AnnouncementIn, AttendanceRowOut, AttendanceSheetIn, AttendanceSheetOut, NoteIn, PlayerSportsUpdate
 from services.errors import BadRequest, Forbidden, NotFound
+from services.presenters import training_shift
 
 
 class CoachingService:
@@ -58,10 +59,20 @@ class CoachingService:
             raise NotFound("No encontramos ese entrenamiento entre los tuyos.")
         return training
 
+    def _expected_players(self, training: TrainingSession):
+        """Approved players of the category who train in this session's shift (all of them if it is shared).
+
+        Same rule as the player's schedule: full-day students only attend the shared ("all") sessions.
+        """
+        players = self.players.list_by_categories([training.category_id], status=EnrollmentStatus.APPROVED)
+        if training.shift == TrainingShift.ALL:
+            return list(players)
+        return [p for p in players if training_shift(p.school_shift) == training.shift]
+
     def sheet(self, user: User, session_id: int, day: date) -> AttendanceSheetOut:
         training = self._session(user, session_id)
         recorded = {a.player_id: a.status for a in self.attendance.for_session(training.id, day)}
-        players = self.players.list_by_categories([training.category_id], status=EnrollmentStatus.APPROVED)
+        players = self._expected_players(training)
         return AttendanceSheetOut(
             session_id=training.id,
             session_date=day,
@@ -80,12 +91,10 @@ class CoachingService:
             raise BadRequest("No se puede tomar asistencia de una fecha futura.")
         if data.session_date.isoweekday() != training.weekday:
             raise BadRequest("La fecha no corresponde al día de la semana de este entrenamiento.")
-        allowed = {
-            p.id for p in self.players.list_by_categories([training.category_id], status=EnrollmentStatus.APPROVED)
-        }
+        allowed = {p.id for p in self._expected_players(training)}
         unknown = [r.player_id for r in data.records if r.player_id not in allowed]
         if unknown:
-            raise BadRequest("Hay deportistas que no pertenecen a esta categoría.")
+            raise BadRequest("Hay deportistas que no pertenecen a esta categoría o no entrenan en esta jornada.")
 
         existing = {a.player_id: a for a in self.attendance.for_session(training.id, data.session_date)}
         for record in data.records:

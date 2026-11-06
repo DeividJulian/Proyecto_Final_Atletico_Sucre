@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, UrlTree } from '@angular/router';
+import { Observable, catchError, map, of } from 'rxjs';
 
 import { PanelRole } from '../models/auth';
 import { NotificationService } from '../services/notification.service';
@@ -12,16 +13,32 @@ export const authGuard: CanActivateFn = (_route, state) => {
   return inject(Router).createUrlTree(['/ingresar'], { queryParams: { volver: state.url } });
 };
 
-/** A panel only for one role; anyone else goes to their own panel. */
-export function roleGuard(role: PanelRole): CanActivateFn {
+/**
+ * A panel only for some roles (an admin is also a coach); anyone else goes to their own panel.
+ * If the saved user still says "must change password", the server is asked first: the password may have
+ * been changed on another device, and the saved copy would keep sending the user to /cambiar-clave.
+ */
+export function roleGuard(...roles: PanelRole[]): CanActivateFn {
   return (_route, state) => {
     const auth = inject(AuthService);
     const router = inject(Router);
-    if (!auth.isLoggedIn()) return router.createUrlTree(['/ingresar'], { queryParams: { volver: state.url } });
-    if (auth.mustChangePassword()) return router.createUrlTree(['/cambiar-clave']);
-    if (auth.role() === role) return true;
-    inject(NotificationService).info('Esa sección no corresponde a tu cuenta.');
-    return router.createUrlTree([auth.homeUrl()]);
+    const notify = inject(NotificationService);
+    const login = router.createUrlTree(['/ingresar'], { queryParams: { volver: state.url } });
+    if (!auth.isLoggedIn()) return login;
+
+    const decide = (): boolean | UrlTree => {
+      if (auth.mustChangePassword()) return router.createUrlTree(['/cambiar-clave']);
+      if (roles.includes(auth.role()!)) return true;
+      notify.info('Esa sección no corresponde a tu cuenta.');
+      return router.createUrlTree([auth.homeUrl()]);
+    };
+
+    if (!auth.mustChangePassword()) return decide();
+    const checked: Observable<boolean | UrlTree> = auth.refreshUser().pipe(
+      map(() => decide()),
+      catchError(() => of(auth.isLoggedIn() ? decide() : login)),
+    );
+    return checked;
   };
 }
 

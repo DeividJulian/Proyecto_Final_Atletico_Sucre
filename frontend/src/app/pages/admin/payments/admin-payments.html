@@ -1,0 +1,141 @@
+<div class="toolbar">
+  <div class="chips" role="group" aria-label="Vista de pagos">
+    <button type="button" class="chip" [attr.aria-pressed]="view() === 'verificar'" (click)="show('verificar')">Por verificar</button>
+    <button type="button" class="chip" [attr.aria-pressed]="view() === 'todos'" (click)="show('todos')">Todos</button>
+    <button type="button" class="chip" [attr.aria-pressed]="view() === 'mora'" (click)="show('mora')">En mora</button>
+    <button type="button" class="chip" [attr.aria-pressed]="view() === 'efectivo'" (click)="show('efectivo')">Registrar efectivo</button>
+  </div>
+  <button type="button" class="btn btn--outline" (click)="exportCsv()">⬇ Exportar CSV</button>
+</div>
+
+@switch (view()) {
+  @case ('mora') {
+    @if (overdue(); as list) {
+      @if (list.length) {
+        <ul class="list" role="list">
+          @for (row of list; track row.player_id) {
+            <li class="card item item--bad">
+              <h3>{{ row.player_name }}</h3>
+              <p class="field-hint">{{ row.category_name ?? 'Sin categoría' }} · {{ row.guardian_name }} · {{ phone(row.guardian_phone) }}</p>
+              <p><strong>Debe {{ cop(row.amount_due) }}</strong> {{ row.overdue_months ? '(' + row.overdue_months + ' mes(es))' : '(inscripción)' }}</p>
+              <a class="btn btn--whatsapp" [href]="row.whatsapp_url" target="_blank" rel="noopener noreferrer">Enviar recordatorio por WhatsApp</a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="empty card">Nadie tiene pagos pendientes. 🎉</p>
+      }
+    } @else {
+      <div class="skeleton"></div>
+    }
+  }
+
+  @case ('efectivo') {
+    <form class="card cash" [formGroup]="cashForm" (ngSubmit)="registerCash()" novalidate>
+      <h3>Registrar pago en efectivo</h3>
+      <p class="field-hint">Queda verificado de inmediato.</p>
+      <div class="form-grid">
+        <div class="field field--wide">
+          <label for="cash-player">Deportista *</label>
+          <select id="cash-player" formControlName="player_id" (change)="pickPlayer()">
+            <option [ngValue]="null" disabled>Selecciona…</option>
+            @for (p of players(); track p.id) {
+              <option [ngValue]="p.id">{{ p.full_name }} — {{ p.category?.name ?? 'sin categoría' }} ({{ label('enrollment', p.enrollment_status) }})</option>
+            }
+          </select>
+          <app-field-error [control]="cashForm.controls.player_id" />
+        </div>
+        <fieldset class="field field--wide">
+          <legend>Concepto</legend>
+          <div class="choice-row">
+            <label class="choice"><input type="radio" formControlName="concept" value="monthly" /> Mensualidad</label>
+            <label class="choice"><input type="radio" formControlName="concept" value="enrollment" /> Inscripción</label>
+          </div>
+        </fieldset>
+        @if (cashForm.controls.concept.value === 'monthly') {
+          <div class="field">
+            <label for="cash-month">Mes</label>
+            <select id="cash-month" formControlName="period_month">
+              @for (name of months; track name; let i = $index) {
+                <option [ngValue]="i + 1">{{ name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="cash-year">Año</label>
+            <select id="cash-year" formControlName="period_year">
+              @for (y of years; track y) {
+                <option [ngValue]="y">{{ y }}</option>
+              }
+            </select>
+          </div>
+        }
+        <div class="field">
+          <label for="cash-amount">Valor (COP) *</label>
+          <input id="cash-amount" type="number" min="1" formControlName="amount" />
+          <app-field-error [control]="cashForm.controls.amount" />
+        </div>
+        <div class="field">
+          <label for="cash-date">Fecha</label>
+          <input id="cash-date" type="date" formControlName="paid_on" [max]="today" />
+        </div>
+        <div class="field">
+          <label for="cash-ref">Recibo / referencia (opcional)</label>
+          <input id="cash-ref" formControlName="reference_number" />
+        </div>
+        <div class="field">
+          <label for="cash-notes">Nota (opcional)</label>
+          <input id="cash-notes" formControlName="notes" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Registrar pago' }}</button>
+      </div>
+    </form>
+  }
+
+  @default {
+    @if (payments(); as list) {
+      @if (list.length) {
+        <ul class="list" role="list">
+          @for (pay of list; track pay.id) {
+            <li class="card item">
+              <div class="item__head">
+                <div>
+                  <h3>{{ pay.player_name }}</h3>
+                  <p class="field-hint">{{ pay.guardian_name }} · {{ phone(pay.guardian_phone) }}</p>
+                </div>
+                <span class="pill" [class]="'pill pill--' + pay.status">{{ label('payment', pay.status) }}</span>
+              </div>
+              <dl class="data-list">
+                <div><dt>Concepto</dt><dd>{{ period(pay) }}</dd></div>
+                <div><dt>Valor</dt><dd>{{ cop(pay.amount) }} · {{ label('method', pay.method) }}</dd></div>
+                <div><dt>Fecha de pago</dt><dd>{{ pay.paid_on | date: 'mediumDate' }}</dd></div>
+                <div><dt>Referencia</dt><dd>{{ pay.reference_number ?? '—' }}</dd></div>
+              </dl>
+              @if (pay.notes) {
+                <p class="field-hint">Nota: {{ pay.notes }}</p>
+              }
+              @if (pay.rejection_reason) {
+                <p class="field-error">Motivo del rechazo: {{ pay.rejection_reason }}</p>
+              }
+              <div class="actions">
+                @if (pay.has_receipt) {
+                  <button type="button" class="btn btn--outline" (click)="receipt(pay)">Ver comprobante</button>
+                }
+                @if (pay.status === 'pending_verification') {
+                  <button type="button" class="btn btn--primary" (click)="verify(pay)" [disabled]="busy() === pay.id">✓ Verificar</button>
+                  <button type="button" class="btn btn--outline danger" (click)="reject(pay)" [disabled]="busy() === pay.id">Rechazar</button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="empty card">{{ view() === 'verificar' ? 'No hay pagos por verificar.' : 'Todavía no hay pagos.' }}</p>
+      }
+    } @else {
+      <div class="skeleton"></div>
+    }
+  }
+}

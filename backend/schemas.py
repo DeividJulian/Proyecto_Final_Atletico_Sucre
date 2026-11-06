@@ -358,6 +358,7 @@ class CoachOut(ORMModel):
     is_public: bool
     has_account: bool = False
     email: str | None = None
+    account_active: bool | None = None
 
 
 class CoachAccountIn(BaseModel):

@@ -1,0 +1,63 @@
+<div class="bar">
+  <button type="button" class="btn btn--primary" (click)="open(null)" [disabled]="editingId() !== undefined">+ Nuevo aviso</button>
+</div>
+
+@if (editingId() !== undefined) {
+  <form class="card form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <h3>{{ editingId() ? 'Editar aviso' : 'Nuevo aviso' }}</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label for="ann-cat">Para</label>
+        <select id="ann-cat" formControlName="category_id">
+          @if (isAdmin()) {
+            <option [ngValue]="null">Todo el club (aviso general)</option>
+          }
+          @for (category of categories(); track category.id) {
+            <option [ngValue]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="ann-exp">Visible hasta (opcional)</label>
+        <input id="ann-exp" type="date" formControlName="expires_at" />
+      </div>
+      <div class="field field--wide">
+        <label for="ann-title">Título *</label>
+        <input id="ann-title" formControlName="title" placeholder="Ej. Partido amistoso el sábado" />
+        <app-field-error [control]="form.controls.title" />
+      </div>
+      <div class="field field--wide">
+        <label for="ann-body">Mensaje *</label>
+        <textarea id="ann-body" rows="5" formControlName="body"></textarea>
+        <app-field-error [control]="form.controls.body" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">{{ saving() ? 'Publicando…' : 'Publicar' }}</button>
+      <button type="button" class="btn btn--outline" (click)="editingId.set(undefined)">Cancelar</button>
+    </div>
+  </form>
+}
+
+@if (items(); as list) {
+  @if (list.length) {
+    <ul class="list" role="list">
+      @for (item of list; track item.id) {
+        <li class="card item" [class.item--general]="!item.category_id">
+          <span class="badge" [class.badge--red]="!item.category_id">{{ item.category_name ?? 'Todo el club' }}</span>
+          <h3>{{ item.title }}</h3>
+          <time>{{ item.created_at | date: 'longDate' }}{{ item.expires_at ? ' · hasta ' + (item.expires_at | date: 'mediumDate') : '' }}</time>
+          <p>{{ item.body }}</p>
+          <div class="actions">
+            <button type="button" class="btn btn--outline" (click)="open(item)">Editar</button>
+            <button type="button" class="btn btn--outline danger" (click)="remove(item)">Eliminar</button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="empty card">Todavía no has publicado avisos.</p>
+  }
+} @else {
+  <div class="skeleton"></div>
+}

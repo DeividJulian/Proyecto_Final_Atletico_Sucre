@@ -33,6 +33,7 @@ def coach_out(coach: Coach) -> CoachOut:
         is_public=coach.is_public,
         has_account=coach.user_id is not None,
         email=coach.user.email if coach.user else None,
+        account_active=coach.user.is_active if coach.user else None,
     )
 
 

@@ -97,3 +97,21 @@ def test_cors_only_allows_known_origins(client):
     assert preflight("http://localhost:4200").headers.get("access-control-allow-origin") == "http://localhost:4200"
     assert preflight("https://atletico-sucre.vercel.app").headers.get("access-control-allow-origin")
     assert "access-control-allow-origin" not in preflight("https://otro-sitio.com").headers
+
+
+def test_admin_deactivates_and_reactivates_a_coach_account(client, admin_token):
+    coach = client.post("/admin/coaches", headers=auth(admin_token), json={"full_name": "Profesor Temporal"}).json()
+    created = client.post(f"/admin/coaches/{coach['id']}/account", headers=auth(admin_token),
+                          json={"email": "temporal@test.com", "password": "Temporal123"}).json()
+    assert created["account_active"] is True
+
+    off = client.post(f"/admin/coaches/{coach['id']}/account/active", headers=auth(admin_token), params={"active": False})
+    assert off.json()["account_active"] is False
+    response = client.post("/auth/login", json={"email": "temporal@test.com", "password": "Temporal123"})
+    assert response.status_code == 401
+
+    on = client.post(f"/admin/coaches/{coach['id']}/account/active", headers=auth(admin_token), params={"active": True})
+    assert on.json()["account_active"] is True
+    assert login(client, "temporal@test.com", "Temporal123")
+    # The public site never exposes account data
+    assert all(c["account_active"] is None for c in client.get("/public/coaches").json())

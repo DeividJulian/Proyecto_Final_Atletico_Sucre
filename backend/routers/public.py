@@ -54,7 +54,7 @@ def schedule(db: Session = Depends(get_db)):
 @router.get("/public/coaches", response_model=list[CoachOut], summary="Cuerpo técnico")
 def coaches(db: Session = Depends(get_db)):
     # The public site never shows which coach has an account
-    return [coach_out(c).model_copy(update={"has_account": False, "email": None}) for c in CoachRepository(db).list_public()]
+    return [coach_out(c).model_copy(update={"has_account": False, "email": None, "account_active": None}) for c in CoachRepository(db).list_public()]
 
 
 @router.get("/public/news", response_model=list[NewsOut], summary="Noticias publicadas")

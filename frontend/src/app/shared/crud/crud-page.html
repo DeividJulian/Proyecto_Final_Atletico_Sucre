@@ -1,0 +1,84 @@
+<div class="crud-bar">
+  <button type="button" class="btn btn--primary" (click)="open(null)" [disabled]="formOpen()">+ Nuevo(a) {{ config().singular.toLowerCase() }}</button>
+</div>
+
+@if (formOpen()) {
+  <form class="card crud-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <h3>{{ editing() === null ? 'Nuevo(a)' : 'Editar' }} {{ config().singular.toLowerCase() }}</h3>
+    <div class="form-grid">
+      @for (field of config().fields; track field.key) {
+        <div class="field" [class.field--wide]="field.wide || field.type === 'textarea' || field.type === 'lines'">
+          @switch (field.type) {
+            @case ('checkbox') {
+              <label class="check">
+                <input type="checkbox" [formControlName]="field.key" />
+                <span>{{ field.label }}</span>
+              </label>
+            }
+            @case ('select') {
+              <label [for]="'crud-' + field.key">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <select [id]="'crud-' + field.key" [formControlName]="field.key">
+                @for (option of field.options?.() ?? []; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            }
+            @case ('textarea') {
+              <label [for]="'crud-' + field.key">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <textarea [id]="'crud-' + field.key" [formControlName]="field.key" rows="5"></textarea>
+            }
+            @case ('lines') {
+              <label [for]="'crud-' + field.key">{{ field.label }}</label>
+              <textarea [id]="'crud-' + field.key" [formControlName]="field.key" rows="5"></textarea>
+            }
+            @default {
+              <label [for]="'crud-' + field.key">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <input
+                [id]="'crud-' + field.key"
+                [type]="field.type"
+                [formControlName]="field.key"
+                [attr.min]="field.min ?? null"
+                [attr.max]="field.max ?? null"
+              />
+            }
+          }
+          @if (field.hint) {
+            <p class="field-hint">{{ field.hint }}</p>
+          }
+          <app-field-error [control]="control(field.key)" />
+        </div>
+      }
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
+      <button type="button" class="btn btn--outline" (click)="close()">Cancelar</button>
+    </div>
+  </form>
+}
+
+@if (error(); as message) {
+  <p class="alert">{{ message }}</p>
+} @else if (items(); as list) {
+  @if (list.length) {
+    <ul class="crud-list" role="list">
+      @for (item of list; track item.id) {
+        <li class="card crud-item" [class.crud-item--editing]="editing() === item.id">
+          <h3>{{ config().heading(item) }}</h3>
+          <dl class="data-list">
+            @for (column of config().columns; track column.label) {
+              <div><dt>{{ column.label }}</dt><dd>{{ column.value(item) }}</dd></div>
+            }
+          </dl>
+          <div class="crud-actions">
+            <button type="button" class="btn btn--outline" (click)="open(item)" [disabled]="formOpen()">Editar</button>
+            <button type="button" class="btn btn--outline crud-delete" (click)="remove(item)">Eliminar</button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="empty card">Todavía no hay registros. Usa "Nuevo(a)" para crear el primero.</p>
+  }
+} @else {
+  <div class="skeleton"></div>
+}

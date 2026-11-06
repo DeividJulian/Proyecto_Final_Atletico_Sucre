@@ -2,6 +2,7 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
+import { Observable } from 'rxjs';
 
 import { API_URL } from '../config/api-url';
 import { SessionUser } from '../models/auth';
@@ -83,9 +84,30 @@ describe('auth', () => {
     expect(router.serializeUrl(redirect)).toBe('/padre');
   });
 
-  it('role guard: an admin with the initial password must change it first', () => {
+  it('role guard: an admin also enters the coach panel, a coach never enters the admin panel', () => {
+    signIn({ ...ADMIN, must_change_password: false });
+    expect(run(roleGuard('coach', 'admin'), '/profesor')).toBe(true);
+    auth.logout(false);
+    signIn(COACH);
+    expect(run(roleGuard('coach', 'admin'), '/profesor')).toBe(true);
+    expect(router.serializeUrl(run(roleGuard('admin'), '/admin') as UrlTree)).toBe('/profesor');
+  });
+
+  it('role guard: an admin with the initial password must change it first (checked with the server)', () => {
     signIn(ADMIN);
-    expect(router.serializeUrl(run(roleGuard('admin'), '/admin') as UrlTree)).toBe('/cambiar-clave');
+    let result: unknown;
+    (run(roleGuard('admin'), '/admin') as Observable<unknown>).subscribe((value) => (result = value));
+    http.expectOne(`${API_URL}/auth/me`).flush(ADMIN);
+    expect(router.serializeUrl(result as UrlTree)).toBe('/cambiar-clave');
+  });
+
+  it('role guard: a stale "must change" flag is refreshed (password changed on another device)', () => {
+    signIn(ADMIN);
+    let result: unknown;
+    (run(roleGuard('admin'), '/admin') as Observable<unknown>).subscribe((value) => (result = value));
+    http.expectOne(`${API_URL}/auth/me`).flush({ ...ADMIN, must_change_password: false });
+    expect(result).toBe(true);
+    expect(auth.mustChangePassword()).toBe(false);
   });
 
   it('auth and guest guards', () => {

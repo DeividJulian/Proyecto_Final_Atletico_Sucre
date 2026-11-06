@@ -1,0 +1,126 @@
+@if (loaded()) {
+  <form class="card" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <h3>Tarifas</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label for="s-enroll">Inscripción (COP)</label>
+        <input id="s-enroll" type="number" min="0" formControlName="enrollment_fee" />
+        <app-field-error [control]="form.controls.enrollment_fee" />
+      </div>
+      <div class="field">
+        <label for="s-month">Mensualidad (COP)</label>
+        <input id="s-month" type="number" min="0" formControlName="monthly_fee" />
+        <app-field-error [control]="form.controls.monthly_fee" />
+        <p class="field-hint">Aplica a las nuevas inscripciones; la de cada deportista se ajusta en "Deportistas".</p>
+      </div>
+      <div class="field">
+        <label for="s-due">Día límite de pago</label>
+        <input id="s-due" type="number" min="1" max="28" formControlName="due_day" />
+        <app-field-error [control]="form.controls.due_day" />
+      </div>
+      <div class="field">
+        <label for="s-sib">Descuento por hermanos (%)</label>
+        <input id="s-sib" type="number" min="0" max="100" formControlName="sibling_discount_percent" />
+        <app-field-error [control]="form.controls.sibling_discount_percent" />
+      </div>
+    </div>
+
+    <h3>Pagos y contacto</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label for="s-nequi">Número Nequi</label>
+        <input id="s-nequi" type="tel" formControlName="nequi_number" placeholder="Vacío = no se muestra" />
+        <app-field-error [control]="form.controls.nequi_number" />
+      </div>
+      <div class="field">
+        <label for="s-holder">Titular de Nequi</label>
+        <input id="s-holder" formControlName="nequi_holder" />
+      </div>
+      <div class="field">
+        <label for="s-wa">WhatsApp del club</label>
+        <input id="s-wa" type="tel" formControlName="whatsapp" />
+        <app-field-error [control]="form.controls.whatsapp" />
+      </div>
+      <div class="field">
+        <label for="s-store">Tienda de uniformes</label>
+        <input id="s-store" formControlName="uniform_store" />
+      </div>
+      <div class="field field--wide">
+        <label for="s-instr">Instrucciones de pago</label>
+        <textarea id="s-instr" rows="3" formControlName="payment_instructions"></textarea>
+      </div>
+    </div>
+    <p class="field-hint">Mientras no haya Nequi configurado, el sitio y el panel de padres muestran "Consulta los datos de pago por WhatsApp".</p>
+
+    <h3>Política de tratamiento de datos (Ley 1581)</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label for="s-pver">Versión</label>
+        <input id="s-pver" formControlName="data_policy_version" />
+        <p class="field-hint">Si cambias el texto, sube la versión: cada aceptación guarda la versión que la familia aceptó.</p>
+      </div>
+      <div class="field field--wide">
+        <label for="s-ptext">Texto</label>
+        <textarea id="s-ptext" rows="6" formControlName="data_policy_text"></textarea>
+        <app-field-error [control]="form.controls.data_policy_text" />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar ajustes' }}</button>
+    </div>
+  </form>
+} @else {
+  <div class="skeleton"></div>
+}
+
+<section class="card">
+  <h3>App móvil (APK para Android)</h3>
+  <p class="field-hint">Publica aquí cada versión que subas a GitHub Releases. La marcada como actual aparece en "Descarga la app" con su código QR.</p>
+  <form [formGroup]="releaseForm" (ngSubmit)="publish()" novalidate>
+    <div class="form-grid">
+      <div class="field">
+        <label for="r-ver">Versión *</label>
+        <input id="r-ver" formControlName="version" placeholder="1.0.0" />
+        <app-field-error [control]="releaseForm.controls.version" />
+      </div>
+      <div class="field">
+        <label for="r-build">Número de compilación *</label>
+        <input id="r-build" type="number" min="1" formControlName="build_number" />
+      </div>
+      <div class="field field--wide">
+        <label for="r-url">Enlace del APK (https) *</label>
+        <input id="r-url" formControlName="apk_url" placeholder="https://github.com/…/releases/download/v1.0.0/atletico-sucre.apk" />
+        <app-field-error [control]="releaseForm.controls.apk_url" />
+      </div>
+      <div class="field">
+        <label for="r-min">Android mínimo</label>
+        <input id="r-min" formControlName="min_android" placeholder="7.0" />
+      </div>
+      <div class="field field--wide">
+        <label for="r-notes">Novedades</label>
+        <textarea id="r-notes" rows="3" formControlName="release_notes"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn--gold" [disabled]="publishing()">{{ publishing() ? 'Publicando…' : 'Publicar versión' }}</button>
+    </div>
+  </form>
+
+  @if (releases().length) {
+    <ul class="releases" role="list">
+      @for (r of releases(); track r.id) {
+        <li>
+          <div>
+            <strong>v{{ r.version }}</strong> <span class="field-hint">(build {{ r.build_number }}) · {{ r.released_at | date: 'mediumDate' }}</span>
+          </div>
+          @if (r.is_current) {
+            <span class="pill pill--approved">Actual</span>
+          } @else {
+            <button type="button" class="btn btn--outline" (click)="makeCurrent(r)">Marcar como actual</button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

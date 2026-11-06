@@ -59,7 +59,16 @@ def test_attendance_flow(client, family_a, admin_token, coach_token):
     tuesday = _last_tuesday()
     sessions = client.get("/coach/sessions", headers=auth(coach_token), params={"day": tuesday.isoformat()}).json()
     assert len(sessions) == 2
-    session_id = sessions[0]["session_id"]
+    by_shift = {s["shift"]: s["session_id"] for s in sessions}
+
+    # The child studies in the morning: not on the morning sheet, yes on the afternoon one
+    morning = client.get(f"/coach/sessions/{by_shift['morning']}/attendance", headers=auth(coach_token),
+                         params={"day": tuesday.isoformat()}).json()
+    assert morning["rows"] == []
+    wrong_shift = client.put(f"/coach/sessions/{by_shift['morning']}/attendance", headers=auth(coach_token),
+                             json={"session_date": tuesday.isoformat(), "records": [{"player_id": child["id"], "status": "present"}]})
+    assert wrong_shift.status_code == 400
+    session_id = by_shift["afternoon"]
 
     saved = client.put(f"/coach/sessions/{session_id}/attendance", headers=auth(coach_token),
                        json={"session_date": tuesday.isoformat(), "records": [{"player_id": child["id"], "status": "present"}]})

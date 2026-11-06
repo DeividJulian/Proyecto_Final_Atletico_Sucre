@@ -520,7 +520,10 @@ a {
   overflow-y: hidden;
   border-bottom: 2px solid var(--color-gray-200);
   margin-bottom: 20px;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 .tabs a,
 .tabs button {
@@ -600,6 +603,18 @@ a {
   text-align: center;
   padding: 32px 16px;
   color: var(--color-gray-500);
+}
+
+@media (min-width: 1024px) {
+  .tabs {
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 2px;
+  }
+  .tabs a,
+  .tabs button {
+    padding: 10px 12px;
+  }
 }
 
 @media (min-width: 640px) {

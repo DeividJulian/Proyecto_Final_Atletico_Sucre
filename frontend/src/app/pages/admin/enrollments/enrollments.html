@@ -1,0 +1,75 @@
+<div class="chips" role="group" aria-label="Filtrar inscripciones">
+  @for (option of filters; track option.value) {
+    <button type="button" class="chip" [attr.aria-pressed]="filter() === option.value" (click)="setFilter(option.value)">{{ option.label }}</button>
+  }
+</div>
+
+@if (players(); as list) {
+  @if (list.length === 0) {
+    <p class="empty card">{{ filter() === 'pending' ? 'No hay inscripciones pendientes. ¡Todo al día!' : 'No hay inscripciones en este estado.' }}</p>
+  } @else {
+    <ul class="list" role="list">
+      @for (player of list; track player.id) {
+        <li class="card item">
+          <div class="item__head">
+            <div>
+              <h3>{{ player.full_name }}</h3>
+              <p class="field-hint">
+                {{ player.document_type }} {{ player.document_number }} · {{ player.age }} años · {{ label('sex', player.sex) }} ·
+                inscrito el {{ player.enrolled_at | date: 'mediumDate' }}
+              </p>
+            </div>
+            <span class="pill" [class]="'pill pill--' + player.enrollment_status">{{ label('enrollment', player.enrollment_status) }}</span>
+          </div>
+
+          @if (player.rejection_reason) {
+            <p class="field-error">Motivo: {{ player.rejection_reason }}</p>
+          }
+
+          <button type="button" class="link-btn" (click)="toggle(player)" [attr.aria-expanded]="expanded() === player.id">
+            {{ expanded() === player.id ? 'Ocultar datos de la familia ▲' : 'Ver datos de la familia y salud ▼' }}
+          </button>
+
+          @if (expanded() === player.id) {
+            @if (details()[player.id]; as d) {
+              <dl class="data-list detail">
+                <div><dt>Acudiente</dt><dd>{{ d.guardian.full_name }} ({{ label('relationship', d.guardian.relationship_to_player) }})</dd></div>
+                <div><dt>Celular</dt><dd><a [href]="'https://wa.me/57' + d.guardian.phone" target="_blank" rel="noopener">{{ phone(d.guardian.phone) }}</a></dd></div>
+                <div><dt>Colegio</dt><dd>{{ d.school_name }} ({{ label('schoolShift', d.school_shift) }})</dd></div>
+                <div><dt>EPS / RH</dt><dd>{{ d.health.eps }} · {{ d.health.blood_type ?? '—' }}</dd></div>
+                <div><dt>Alergias / condiciones</dt><dd>{{ d.health.allergies ?? '—' }} · {{ d.health.medical_notes ?? '—' }}</dd></div>
+                <div><dt>Emergencia</dt><dd>{{ d.health.emergency_contact_name }} · {{ phone(d.health.emergency_contact_phone) }}</dd></div>
+              </dl>
+            } @else {
+              <div class="skeleton small"></div>
+            }
+          }
+
+          @if (player.enrollment_status === 'pending' && choice[player.id]; as c) {
+            <div class="approve form-grid">
+              <div class="field">
+                <label [for]="'cat-' + player.id">Categoría</label>
+                <select [id]="'cat-' + player.id" [(ngModel)]="c.category_id">
+                  <option [ngValue]="null" disabled>Selecciona…</option>
+                  @for (category of categories(); track category.id) {
+                    <option [ngValue]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label [for]="'fee-' + player.id">Mensualidad (COP)</label>
+                <input [id]="'fee-' + player.id" type="number" min="0" [(ngModel)]="c.monthly_fee" />
+              </div>
+            </div>
+            <div class="actions">
+              <button type="button" class="btn btn--primary" (click)="approve(player)" [disabled]="busy() === player.id">✓ Aprobar</button>
+              <button type="button" class="btn btn--outline danger" (click)="reject(player)" [disabled]="busy() === player.id">Rechazar</button>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+} @else {
+  <div class="skeleton"></div>
+}

@@ -1,0 +1,110 @@
+<div class="bar">
+  <p class="field-hint">Los perfiles públicos aparecen en la sección "Cuerpo técnico" del sitio. Las categorías a cargo se asignan en "Categorías y horarios".</p>
+  <button type="button" class="btn btn--primary" (click)="open(null)" [disabled]="editing() !== undefined">+ Nuevo profesor</button>
+</div>
+
+@if (editing() !== undefined) {
+  <form class="card form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <h3>{{ editing() === null ? 'Nuevo profesor' : 'Editar perfil' }}</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label for="c-name">Nombre completo *</label>
+        <input id="c-name" formControlName="full_name" />
+        <app-field-error [control]="form.controls.full_name" />
+      </div>
+      <div class="field">
+        <label for="c-role">Cargo *</label>
+        <input id="c-role" formControlName="role_title" placeholder="Entrenador, Preparador de porteros…" />
+      </div>
+      <div class="field field--wide">
+        <label for="c-cred">Formación y logros (uno por línea)</label>
+        <textarea id="c-cred" rows="5" formControlName="credentials"></textarea>
+      </div>
+      <div class="field">
+        <label for="c-photo">Foto (ruta o URL)</label>
+        <input id="c-photo" formControlName="photo_url" placeholder="/img/cuerpo-tecnico/nombre.jpeg" />
+      </div>
+      <div class="field">
+        <label for="c-pos">Encuadre de la foto</label>
+        <input id="c-pos" formControlName="photo_position" placeholder="top, center, center 20%" />
+      </div>
+      <div class="field">
+        <label for="c-order">Orden en el sitio</label>
+        <input id="c-order" type="number" formControlName="display_order" />
+      </div>
+      <label class="check">
+        <input type="checkbox" formControlName="is_public" />
+        <span>Mostrar en el sitio público</span>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">Guardar</button>
+      <button type="button" class="btn btn--outline" (click)="editing.set(undefined)">Cancelar</button>
+    </div>
+  </form>
+}
+
+@if (coaches(); as list) {
+  <ul class="list" role="list">
+    @for (coach of list; track coach.id) {
+      <li class="card item">
+        <div class="item__head">
+          @if (coach.photo_url) {
+            <img [src]="coach.photo_url" [style.object-position]="coach.photo_position" alt="" class="item__photo" />
+          } @else {
+            <span class="item__photo item__initials" aria-hidden="true">{{ coach.full_name[0] }}</span>
+          }
+          <div>
+            <h3>{{ coach.full_name }}</h3>
+            <p class="field-hint">{{ coach.role_title }} · {{ coach.is_public ? 'Visible en el sitio' : 'No visible en el sitio' }}</p>
+            @if (coach.has_account) {
+              <span class="pill" [class]="'pill ' + (coach.account_active ? 'pill--approved' : 'pill--inactive')">
+                {{ coach.account_active ? 'Cuenta' : 'Cuenta desactivada' }}: {{ coach.email }}
+              </span>
+            } @else {
+              <span class="pill pill--upcoming">Sin cuenta</span>
+            }
+          </div>
+        </div>
+
+        @if (accountFor() === coach.id) {
+          <form class="account" [formGroup]="accountForm" (ngSubmit)="createAccount(coach)" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label [for]="'a-email-' + coach.id">Correo *</label>
+                <input [id]="'a-email-' + coach.id" type="email" formControlName="email" />
+                <app-field-error [control]="accountForm.controls.email" />
+              </div>
+              <div class="field">
+                <label [for]="'a-pass-' + coach.id">Contraseña inicial *</label>
+                <input [id]="'a-pass-' + coach.id" type="text" formControlName="password" autocomplete="off" />
+                <app-field-error [control]="accountForm.controls.password" />
+              </div>
+            </div>
+            <p class="field-hint">Se crea con rol de profesor (nunca administrador). Deberá cambiar la contraseña al ingresar.</p>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary" [disabled]="saving()">Crear cuenta</button>
+              <button type="button" class="btn btn--outline" (click)="accountFor.set(null)">Cancelar</button>
+            </div>
+          </form>
+        }
+
+        <div class="actions">
+          <button type="button" class="btn btn--outline" (click)="open(coach)">Editar perfil</button>
+          @if (!coach.has_account && accountFor() !== coach.id) {
+            <button type="button" class="btn btn--outline" (click)="openAccount(coach)">Crear cuenta</button>
+          }
+          @if (coach.has_account && coach.role_title !== 'Administrador') {
+            @if (coach.account_active) {
+              <button type="button" class="btn btn--outline danger" (click)="toggleActive(coach, false)">Desactivar cuenta</button>
+            } @else {
+              <button type="button" class="btn btn--outline" (click)="toggleActive(coach, true)">Reactivar cuenta</button>
+            }
+          }
+        </div>
+      </li>
+    }
+  </ul>
+} @else {
+  <div class="skeleton"></div>
+}
