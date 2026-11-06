@@ -90,7 +90,9 @@ class SupabaseStorage(FileStorage):
             raise ExternalServiceError("El almacenamiento de archivos no está configurado en el servidor.")
         self.base = f"{config.SUPABASE_URL}/storage/v1"
         self.bucket = config.SUPABASE_BUCKET
-        self.headers = {"Authorization": f"Bearer {config.SUPABASE_SERVICE_KEY}", "apikey": config.SUPABASE_SERVICE_KEY}
+        key = config.SUPABASE_SERVICE_KEY
+        # New Supabase secret keys (sb_secret_…) go only in "apikey"; the legacy service_role JWT also as Bearer
+        self.headers = {"apikey": key} if key.startswith("sb_") else {"apikey": key, "Authorization": f"Bearer {key}"}
 
     def _call(self, method: str, url: str, **kwargs) -> httpx.Response:
         try:
@@ -98,7 +100,7 @@ class SupabaseStorage(FileStorage):
             response.raise_for_status()
             return response
         except httpx.HTTPError as error:
-            logger.error("Supabase Storage failed: %s", error)
+            logger.exception("Supabase Storage failed: %s", error)
             raise ExternalServiceError("No pudimos guardar o leer el archivo. Intenta de nuevo.") from error
 
     def save(self, key: str, data: bytes, content_type: str) -> None:

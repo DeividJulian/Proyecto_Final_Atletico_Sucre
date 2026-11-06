@@ -4,7 +4,8 @@
 
 Idempotent: it can be run many times; what already exists is left as it is (the admin edits it from the panel).
 - The 2 admins come from ADMIN_EMAILS (created on startup), never from this file.
-- The test accounts (coach and two parents) are only created when SEED_PASSWORD is set in .env.
+- The test accounts (coach and two parents) are only created with ENVIRONMENT=development and SEED_PASSWORD
+  set in .env. In production (Render) the seed only loads the club data.
 """
 import logging
 from datetime import date, datetime, time, timezone
@@ -223,10 +224,14 @@ def _register(session: Session, email: str, guardian: dict, players: list[dict])
     return created
 
 
-def seed_test_accounts(session: Session) -> None:
+def seed_test_accounts(session: Session) -> bool:
+    """Creates the test coach and parents. Only in development; returns whether it ran."""
+    if not config.IS_DEVELOPMENT:
+        logger.info("ENVIRONMENT=%s: no se crean cuentas de prueba", config.ENVIRONMENT)
+        return False
     if not config.SEED_PASSWORD:
         logger.warning("SEED_PASSWORD vacío: no se crean las cuentas de prueba")
-        return
+        return False
     users = UserRepository(session)
     admin = users.admins()[0] if users.admins() else None
 
@@ -266,6 +271,7 @@ def seed_test_accounts(session: Session) -> None:
         )
         if admin is not None:
             EnrollmentService(session, MemoryMailer()).approve(admin, players[0].id, ApproveIn())
+    return True
 
 
 def run() -> None:

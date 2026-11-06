@@ -15,16 +15,18 @@ Página web informativa + registro de padres de familia + paneles por rol (padre
 
 ## Cuentas de prueba
 
-Las crea `python seed.py`. **Las contraseñas no están en el código:** las de prueba son el valor de
-`SEED_PASSWORD` de tu `.env` (o de Render), y la de los admins es `ADMIN_PASSWORD_INICIAL` (si está vacía,
-también `SEED_PASSWORD`). Los admins deben cambiarla en el primer ingreso.
+**Solo existen en desarrollo** (`ENVIRONMENT=development`): `python seed.py` las crea en tu máquina.
+En producción (Render) el seed no crea cuentas de prueba. Aquí no hay contraseñas: están solo en tu `.env`.
 
 | Rol | Correo | Contraseña | Qué tiene |
 |---|---|---|---|
-| Admin 1 y 2 | los de `ADMIN_EMAILS` | `ADMIN_PASSWORD_INICIAL` | Todo el club; son profesores con `is_admin = true` |
-| Profesor | `profesor@atleticosucre.test` | `SEED_PASSWORD` | Categorías 2014-2015 y 2016-2017 |
-| Padre 1 | `padre@atleticosucre.test` | `SEED_PASSWORD` | 2 hijos: Mateo (2015, aprobado, inscripción pagada) y Sofía (2017, Femenino, pendiente) |
-| Padre 2 | `padre2@atleticosucre.test` | `SEED_PASSWORD` | 1 hijo: Samuel (2014, aprobado). Sirve para probar que un padre no ve los hijos de otro |
+| Profesor | `profesor@atleticosucre.test` | la de `SEED_PASSWORD` de tu `.env` | Categorías 2014-2015 y 2016-2017 |
+| Padre 1 | `padre@atleticosucre.test` | la de `SEED_PASSWORD` de tu `.env` | 2 hijos: Mateo (2015, aprobado, inscripción pagada) y Sofía (2017, Femenino, pendiente) |
+| Padre 2 | `padre2@atleticosucre.test` | la de `SEED_PASSWORD` de tu `.env` | 1 hijo: Samuel (2014, aprobado). Sirve para probar que un padre no ve los hijos de otro |
+
+**Administradores (desarrollo y producción):** los correos de `ADMIN_EMAILS`. Su contraseña inicial es
+`ADMIN_PASSWORD_INICIAL`, obligatoria en producción (si falta, el servidor no arranca). En desarrollo, si está
+vacía, se usa la de `SEED_PASSWORD`. Se pide cambiarla en el primer ingreso.
 
 ## Estructura del monorepo
 
@@ -40,7 +42,7 @@ también `SEED_PASSWORD`). Los admins deben cambiarla en el primer ingreso.
 ## Cómo correrlo en local
 
 ### Requisitos
-- Python 3.12 (la misma versión de Render)
+- Python 3.14 (la misma versión de Render: `PYTHON_VERSION=3.14.7`)
 - Node.js 20.19+ / 22+ y npm
 - Flutter 3.x (solo para `mobile/`, desde la Fase 7)
 
@@ -48,7 +50,7 @@ también `SEED_PASSWORD`). Los admins deben cambiarla en el primer ingreso.
 
 ```bash
 cd backend
-py -3.12 -m venv .venv        # Linux / macOS: python3.12 -m venv .venv
+py -3.14 -m venv .venv        # Linux / macOS: python3.14 -m venv .venv
 # Windows:
 .venv\Scripts\activate
 # Linux / macOS:

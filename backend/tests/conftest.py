@@ -3,6 +3,7 @@ import tempfile
 
 # IMPORTANT: set BEFORE importing the app so the tests never touch Supabase or send emails
 _TMP = tempfile.mkdtemp(prefix="atletico-tests-")
+os.environ["ENVIRONMENT"] = "development"
 os.environ["DATABASE_URL"] = f"sqlite:///{_TMP}/test.db"
 os.environ["SECRET_KEY"] = "test-secret-for-pytest-only-0123456789abcdef"
 os.environ["EMAIL_BACKEND"] = "memoria"
@@ -39,7 +40,6 @@ def fresh_database():
     init_database()
     _seed_structure()
     OUTBOX.clear()
-    yield
 
 
 def _seed_structure() -> None:

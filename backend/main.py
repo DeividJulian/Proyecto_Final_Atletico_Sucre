@@ -28,6 +28,12 @@ logger = logging.getLogger("atletico.api")
 
 
 def init_database() -> None:
+    try:
+        config.check_production_settings()
+    except config.ConfigError as error:
+        logger.critical("%s", error)
+        raise
+    logger.info("Starting in %s mode (%s)", config.ENVIRONMENT, engine.dialect.name)
     Base.metadata.create_all(bind=engine)
     apply_migrations(engine)
     with SessionLocal() as session:

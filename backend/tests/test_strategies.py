@@ -43,24 +43,47 @@ def _payment(pid, concept, year, month, status=PaymentStatus.VERIFIED):
 
 def test_monthly_due_day_policy():
     policy = MonthlyDueDayPolicy(due_day=5, enrollment_fee=20000)
-    player = _player(datetime(2026, 2, 10, tzinfo=timezone.utc))
+    player = _player(datetime(2026, 2, 10, tzinfo=timezone.utc))  # approved on February 10th
     payments = [
         _payment(1, "enrollment", None, None),
-        _payment(2, "monthly", 2026, 2),
-        _payment(3, "monthly", 2026, 3, PaymentStatus.PENDING_VERIFICATION),
-        _payment(4, "monthly", 2026, 4, PaymentStatus.REJECTED),
+        _payment(2, "monthly", 2026, 3),
+        _payment(3, "monthly", 2026, 4, PaymentStatus.PENDING_VERIFICATION),
+        _payment(4, "monthly", 2026, 5, PaymentStatus.REJECTED),
     ]
-    state = policy.account(player, payments, 2026, today=date(2026, 5, 3))
+    state = policy.account(player, payments, 2026, today=date(2026, 6, 3))
     statuses = [m.status for m in state.months]
     assert statuses[0] == MonthStatus.NOT_ENROLLED  # January, before approval
-    assert statuses[1] == MonthStatus.PAID
-    assert statuses[2] == MonthStatus.IN_REVIEW
-    assert statuses[3] == MonthStatus.OVERDUE       # rejected payment does not count
-    assert statuses[4] == MonthStatus.DUE           # May 3rd, due day is 5
-    assert statuses[5] == MonthStatus.UPCOMING
+    assert statuses[1] == MonthStatus.GRACE         # approval month never becomes overdue
+    assert statuses[2] == MonthStatus.PAID
+    assert statuses[3] == MonthStatus.IN_REVIEW
+    assert statuses[4] == MonthStatus.OVERDUE       # rejected payment does not count
+    assert statuses[5] == MonthStatus.DUE           # June 3rd, due day is 5
+    assert statuses[6] == MonthStatus.UPCOMING
     assert state.overdue_months == 1
     assert state.amount_due == 65000
     assert state.is_up_to_date is False
 
-    after_due_day = policy.account(player, payments, 2026, today=date(2026, 5, 6))
+    after_due_day = policy.account(player, payments, 2026, today=date(2026, 6, 6))
     assert after_due_day.overdue_months == 2
+
+
+def test_approval_month_is_grace_even_after_due_day():
+    """Approved on the 20th: that month is not owed; the first charge is next month with the due day."""
+    policy = MonthlyDueDayPolicy(due_day=5, enrollment_fee=20000)
+    player = _player(datetime(2026, 11, 20, tzinfo=timezone.utc))
+    enrollment = [_payment(1, "enrollment", None, None)]
+
+    november = policy.account(player, enrollment, 2026, today=date(2026, 11, 28))
+    assert november.months[10].status == MonthStatus.GRACE
+    assert november.is_up_to_date is True and november.overdue_months == 0
+
+    december_before = policy.account(player, enrollment, 2026, today=date(2026, 12, 5))
+    assert december_before.months[11].status == MonthStatus.DUE and december_before.is_up_to_date is True
+
+    december_after = policy.account(player, enrollment, 2026, today=date(2026, 12, 6))
+    assert december_after.months[11].status == MonthStatus.OVERDUE and december_after.overdue_months == 1
+
+    # Months of the previous year since the first charged month keep counting the next year
+    january = policy.account(player, enrollment, 2027, today=date(2027, 1, 10))
+    assert january.overdue_months == 2  # December 2026 + January 2027
+    assert january.amount_due == 2 * 65000

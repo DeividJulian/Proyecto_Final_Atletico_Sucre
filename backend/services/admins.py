@@ -19,8 +19,9 @@ logger = logging.getLogger("atletico.admins")
 def ensure_admins(session: Session) -> list[User]:
     users = UserRepository(session)
     coaches = CoachRepository(session)
+    config.check_production_settings()
     wanted = config.ADMIN_EMAILS[: config.MAX_ADMINS]
-    password = config.ADMIN_INITIAL_PASSWORD or config.SEED_PASSWORD
+    password = config.admin_initial_password()
 
     # Accounts that are no longer in ADMIN_EMAILS lose the flag (stay as regular coaches)
     for admin in users.admins():

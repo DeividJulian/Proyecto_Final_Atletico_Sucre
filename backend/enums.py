@@ -109,6 +109,7 @@ class MonthStatus(StrEnum):
     DUE = "due"          # current month, before the due day
     OVERDUE = "overdue"
     NOT_ENROLLED = "not_enrolled"
+    GRACE = "grace"      # month the enrollment was approved: it never becomes overdue
     UPCOMING = "upcoming"
 
 
@@ -124,7 +125,3 @@ class MediaType(StrEnum):
 
 class CodePurpose(StrEnum):
     PASSWORD_RESET = "password_reset"
-
-
-def values(enum: type[StrEnum]) -> list[str]:
-    return [member.value for member in enum]

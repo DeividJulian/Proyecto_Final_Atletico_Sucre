@@ -59,7 +59,7 @@ class BrevoMailer(Mailer):
             )
             response.raise_for_status()
         except httpx.HTTPError as error:
-            logger.error("Brevo failed: %s", error)
+            logger.exception("Brevo failed: %s", error)
             raise ExternalServiceError("No pudimos enviar el correo. Intenta de nuevo en unos minutos.") from error
 
 

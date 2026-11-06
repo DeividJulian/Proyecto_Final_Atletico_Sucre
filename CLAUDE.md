@@ -58,7 +58,7 @@ Reglas:
 Referencia de código: `https://github.com/DeividJulian/sistema-horarios-universitarios` (backend/ y frontend/). Copia sus convenciones.
 
 **Backend** — `backend/`
-- Python 3.12, **FastAPI**, **SQLAlchemy 2**, `psycopg[binary]` 3, Pydantic 2, `email-validator`, `python-dotenv`, **PyJWT**.
+- Python 3.14 (local y Render), **FastAPI**, **SQLAlchemy 2**, `psycopg[binary]` 3, Pydantic 2, `email-validator`, `python-dotenv`, **PyJWT**.
 - Contraseñas con `bcrypt` (passlib o bcrypt directo). Nunca guardar contraseñas en texto plano.
 - Estructura: `main.py`, `config.py` (todo desde variables de entorno), `database.py`, `models.py`, `schemas.py`, `security.py` (JWT + dependencias por rol), `routers/`, `services/` (lógica de negocio), `repositories/` (acceso a datos), `tests/` (pytest).
 - `GET /health` para Render. Documentación automática en `/docs`.
