@@ -1,0 +1,49 @@
+/* Design tokens of the club: red, black and gold (escudo real como logo).
+   Components read these variables; no component library is used. */
+:root {
+  --color-red: #e10600;
+  --color-red-dark: #a30400;
+  --color-black: #111111;
+  --color-gold: #d4a017;
+  --color-gold-light: #f5c842;
+  --color-white: #ffffff;
+  --color-gray-50: #f7f7f7;
+  --color-gray-200: #e5e5e5;
+  --color-gray-500: #6b6b6b;
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-danger: #b91c1c;
+
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --gutter: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-gray-50);
+  color: var(--color-black);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}

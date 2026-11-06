@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: atletico-sucre-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      # Supabase connection pooler URI (postgresql+psycopg://...:6543/postgres), entered in Render
+      - key: DATABASE_URL
+        sync: false
+      # Signs the session tokens; Render generates a random value once
+      - key: SECRET_KEY
+        generateValue: true
+      - key: TOKEN_HORAS
+        value: "8"
+      # The 2 administrators, comma separated, and their initial password
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: ADMIN_PASSWORD_INICIAL
+        sync: false
+      # Vercel domain, the only production origin allowed by CORS
+      - key: FRONTEND_ORIGIN
+        sync: false
+      # Emails go out through Brevo's HTTP API (the free plan blocks SMTP ports)
+      - key: EMAIL_BACKEND
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_FROM_NAME
+        value: Club Atlético Sucre
+      # Player photos and payment receipts
+      - key: STORAGE_BACKEND
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_BUCKET
+        value: atletico-sucre

@@ -1,0 +1,25 @@
+# Secrets
+.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+build/
+dist/
+
+# Tests / tools
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+test_*.db
+*.sqlite3
+
+# Local uploads (in production files go to Supabase Storage)
+uploads/

@@ -1,0 +1,32 @@
+# ---------- Secrets (never in the repo; each folder has its .env.example) ----------
+.env
+.env.*
+!.env.example
+
+# ---------- OS / editors ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ---------- Logs ----------
+*.log
+npm-debug.log*
+
+# ---------- Local scratch ----------
+tmp/
+*.tmp
+
+# ---------- Large binaries that live in GitHub Releases / Supabase Storage ----------
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# ---------- AI Studio reference (only the source is kept) ----------
+referencia-ai-studio/**/node_modules/
+referencia-ai-studio/**/dist/
