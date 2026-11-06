@@ -15,13 +15,16 @@ Página web informativa + registro de padres de familia + paneles por rol (padre
 
 ## Cuentas de prueba
 
-_Se publican al terminar la Fase 2 (seed)._
+Las crea `python seed.py`. **Las contraseñas no están en el código:** las de prueba son el valor de
+`SEED_PASSWORD` de tu `.env` (o de Render), y la de los admins es `ADMIN_PASSWORD_INICIAL` (si está vacía,
+también `SEED_PASSWORD`). Los admins deben cambiarla en el primer ingreso.
 
-| Rol | Correo | Contraseña |
-|---|---|---|
-| Admin | — | — |
-| Profesor | — | — |
-| Padre | — | — |
+| Rol | Correo | Contraseña | Qué tiene |
+|---|---|---|---|
+| Admin 1 y 2 | los de `ADMIN_EMAILS` | `ADMIN_PASSWORD_INICIAL` | Todo el club; son profesores con `is_admin = true` |
+| Profesor | `profesor@atleticosucre.test` | `SEED_PASSWORD` | Categorías 2014-2015 y 2016-2017 |
+| Padre 1 | `padre@atleticosucre.test` | `SEED_PASSWORD` | 2 hijos: Mateo (2015, aprobado, inscripción pagada) y Sofía (2017, Femenino, pendiente) |
+| Padre 2 | `padre2@atleticosucre.test` | `SEED_PASSWORD` | 1 hijo: Samuel (2014, aprobado). Sirve para probar que un padre no ve los hijos de otro |
 
 ## Estructura del monorepo
 
@@ -37,7 +40,7 @@ _Se publican al terminar la Fase 2 (seed)._
 ## Cómo correrlo en local
 
 ### Requisitos
-- Python 3.12 o superior
+- Python 3.12 (la misma versión de Render)
 - Node.js 20.19+ / 22+ y npm
 - Flutter 3.x (solo para `mobile/`, desde la Fase 7)
 
@@ -45,20 +48,40 @@ _Se publican al terminar la Fase 2 (seed)._
 
 ```bash
 cd backend
-python -m venv .venv
+py -3.12 -m venv .venv        # Linux / macOS: python3.12 -m venv .venv
 # Windows:
 .venv\Scripts\activate
 # Linux / macOS:
 source .venv/bin/activate
 
 pip install -r requirements-dev.txt
-cp .env.example .env          # y completa los valores
+cp .env.example .env          # y completa los valores (ADMIN_EMAILS, SEED_PASSWORD, SECRET_KEY)
+python seed.py                # sedes, categorías, horarios, cuerpo técnico y cuentas de prueba
 uvicorn main:app --reload --port 8000
-pytest                        # pruebas
+pytest                        # pruebas (usan SQLite temporal, nunca Supabase)
 ```
 
 - Salud: http://127.0.0.1:8000/health
-- Documentación: http://127.0.0.1:8000/docs
+- Documentación interactiva: http://127.0.0.1:8000/docs (botón **Authorize** → pega el `access_token`)
+
+### Arquitectura del backend
+
+```
+backend/
+├── main.py            app, CORS, manejo uniforme de errores {"detail": "..."}
+├── config.py          todo desde variables de entorno
+├── database.py        engine, sesión y Base (SQLAlchemy 2)
+├── models.py          entidades (tablas en inglés)        enums.py  valores permitidos
+├── schemas.py         Pydantic: validación y mensajes en español
+├── security.py        bcrypt, JWT y dependencias por rol (require_parent / require_coach / require_admin)
+├── dependencies.py    inyección de dependencias de los servicios
+├── policies/          AccessPolicy: quién puede ver qué deportista
+├── repositories/      acceso a datos (Repository)
+├── services/          reglas de negocio (Service Layer, Strategy, Factory)
+├── routers/           HTTP: public, auth, parent (/me), coach (/coach), admin (/admin), crud
+├── seed.py            datos de ejemplo           migrations.py  columnas nuevas sin borrar datos
+└── tests/             pytest
+```
 
 ### Frontend (http://localhost:4200)
 
@@ -84,11 +107,19 @@ npm run build      # salida en dist/atletico-sucre-web/browser
 
 ## Patrones de diseño
 
-Se documentan en detalle al terminar la Fase 2: Repository, Service Layer, Dependency Injection,
-Strategy (categoría por año de nacimiento y estado de pago), Factory (correo y almacenamiento)
-y Policy (propiedad de los datos de cada deportista).
+| Patrón | Dónde | Para qué |
+|---|---|---|
+| **Repository** | `backend/repositories/` (`AbstractRepository` → `SqlAlchemyRepository` → uno por entidad) | Los servicios no escriben consultas SQL; se pueden probar y cambiar la base sin tocarlos |
+| **Service Layer** | `backend/services/` | Las reglas (inscripción, pagos, asistencia) viven en un solo lugar; los routers solo traducen HTTP |
+| **Dependency Injection** | `backend/dependencies.py` con `Depends(...)` | Cada servicio recibe su sesión, estrategia, correo y almacenamiento; en pruebas se reemplazan con `dependency_overrides` |
+| **Strategy** | `services/category_strategy.py` (`BirthYearRangeStrategy`, `AgeAtCutoffStrategy`) y `services/payment_status.py` (`MonthlyDueDayPolicy`) | La regla para asignar la categoría y la regla de "al día" se cambian agregando una clase, sin tocar los servicios |
+| **Factory** | `get_mailer()` (consola / memoria / Brevo), `get_storage()` (local / Supabase), `PlayerFactory`, `crud_router()` | Crear el objeto correcto según la configuración, y generar los CRUD de catálogos con un solo molde |
+| **Policy** | `policies/ownership.py` (`AccessPolicy`) | Verifica en **cada** endpoint que el deportista pertenezca al padre (o a las categorías del profesor). Si no, responde 404 |
+| **Unit of Work** (transacción) | `AuthService.register_parent` | El acudiente, sus hijos y las autorizaciones se guardan completos o no se guarda nada |
 
 ## Datos personales
 
-El registro incluye la autorización de tratamiento de datos personales (Ley 1581 de 2012).
-Los datos de un deportista solo los ven su acudiente, el profesor de su categoría y los administradores.
+El registro incluye la autorización de tratamiento de datos personales (Ley 1581 de 2012), obligatoria,
+y la de uso de imagen, opcional. Cada aceptación queda guardada con la versión del texto, la fecha y la IP (`data_consents`).
+Los datos de un deportista (incluida su salud) solo los ven su acudiente, el profesor de su categoría y los
+administradores. Las fotos y los comprobantes son privados: se entregan solo después de verificar quién los pide.

@@ -23,6 +23,14 @@ services:
         sync: false
       - key: ADMIN_PASSWORD_INICIAL
         sync: false
+      # Test accounts of seed.py: only if SEED_PASSWORD is set (useful for the demo; leave it empty otherwise)
+      - key: SEED_PASSWORD
+        sync: false
+      # Password-recovery codes
+      - key: CODIGO_MINUTOS
+        value: "15"
+      - key: CODIGO_INTENTOS
+        value: "5"
       # Vercel domain, the only production origin allowed by CORS
       - key: FRONTEND_ORIGIN
         sync: false

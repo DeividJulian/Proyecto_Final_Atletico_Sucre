@@ -18,7 +18,7 @@ dist/
 htmlcov/
 .mypy_cache/
 .ruff_cache/
-test_*.db
+*.db
 *.sqlite3
 
 # Local uploads (in production files go to Supabase Storage)
