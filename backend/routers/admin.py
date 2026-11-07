@@ -12,6 +12,7 @@ from dependencies import (
     get_news_service,
     get_payment_service,
     get_release_service,
+    get_risk_service,
     get_settings_service,
     get_stats_service,
 )
@@ -38,6 +39,7 @@ from schemas import (
     PlayerDetailOut,
     PlayerOut,
     RejectIn,
+    RiskReportOut,
     StatsOut,
 )
 from security import require_admin
@@ -46,6 +48,7 @@ from services.enrollment import EnrollmentService
 from services.errors import NotFound
 from services.payments import PaymentService
 from services.presenters import guardian_out, payment_admin_out, player_detail, player_out
+from services.risk import RiskService
 from services.stats import StatsService
 
 router = APIRouter(prefix="/admin", tags=["administración"], dependencies=[Depends(require_admin)])
@@ -61,6 +64,20 @@ Payments = Annotated[PaymentService, Depends(get_payment_service)]
 @router.get("/stats", response_model=StatsOut, summary="Estadísticas del dashboard")
 def stats(service: Annotated[StatsService, Depends(get_stats_service)]):
     return service.summary()
+
+
+@router.get(
+    "/risk",
+    response_model=RiskReportOut,
+    summary="Riesgo de deserción de los deportistas aprobados (modelo de demostración)",
+    description=(
+        "Probabilidad estimada de que cada deportista abandone, nivel (low/medium/high) y los factores que más pesan. "
+        "El modelo se entrenó con datos sintéticos hasta que el club tenga historial real (ver ml/REPORT.md)."
+    ),
+    responses={503: {"description": "El modelo no está disponible en el servidor"}},
+)
+def risk(service: Annotated[RiskService, Depends(get_risk_service)], category_id: int | None = None):
+    return service.report(category_id=category_id)
 
 
 # ---------- enrollments and players

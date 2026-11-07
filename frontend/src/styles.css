@@ -545,6 +545,7 @@ a {
 }
 .pill {
   display: inline-block;
+  white-space: nowrap;
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 0.78rem;
@@ -574,6 +575,18 @@ a {
 .pill--inactive {
   background: var(--color-red-soft);
   color: var(--color-red-dark);
+}
+.pill--risk-high {
+  background: var(--color-red-soft);
+  color: var(--color-red-dark);
+}
+.pill--risk-medium {
+  background: var(--color-gold-soft);
+  color: #7a5a00;
+}
+.pill--risk-low {
+  background: #e3f5ea;
+  color: #166534;
 }
 .pill--not_enrolled,
 .pill--upcoming {

@@ -12,7 +12,7 @@ Página web informativa + registro de padres de familia + paneles por rol (padre
 | Web (Vercel) | https://proyecto-final-atletico-sucre.vercel.app |
 | API (Render) | https://proyecto-final-atletico-sucre.onrender.com — documentación interactiva en [/docs](https://proyecto-final-atletico-sucre.onrender.com/docs), salud en [/health](https://proyecto-final-atletico-sucre.onrender.com/health) |
 | Base de datos | PostgreSQL en Supabase (Session pooler, puerto 5432) con RLS activado en todas las tablas |
-| APK Android | _pendiente (Fase 7)_ — GitHub Releases |
+| APK Android | **Pendiente (Fase 7 en pausa)**: la parte 1 está en la rama `feature/mobile`; se publicará en GitHub Releases |
 
 ## Cuentas de prueba
 
@@ -35,7 +35,7 @@ vacía, se usa la de `SEED_PASSWORD`. Se pide cambiarla en el primer ingreso.
 .
 ├── backend/    FastAPI + SQLAlchemy 2 + PostgreSQL (Supabase) → Render
 ├── frontend/   Angular 22 (standalone, signals) → Vercel
-├── mobile/     Flutter (Riverpod) → APK en GitHub Releases
+├── mobile/     Flutter (Riverpod) → APK en GitHub Releases (PENDIENTE: código en la rama feature/mobile)
 ├── referencia-ai-studio/   diseño de referencia (no se despliega)
 └── CLAUDE.md   contexto y reglas del proyecto
 ```
@@ -115,6 +115,39 @@ npm run build      # salida en dist/atletico-sucre-web/browser
   al recargar), caché larga para JS/CSS con hash y encabezados de seguridad. Node `22.x` (en `package.json`).
 - Cada push a `main` despliega solo. La URL de producción va en `FRONTEND_ORIGIN` de Render (sin `/` al final);
   las URL de vista previa de Vercel no están autorizadas por CORS.
+
+## Modelo de riesgo de deserción (Fase 8)
+
+Estima qué deportistas **aprobados** podrían abandonar el club para que el admin hable a tiempo con la familia
+(panel admin → **Riesgo de deserción**, `GET /admin/risk`, solo administradores).
+
+> **Modelo de demostración.** El club aún no tiene historial de deserciones, así que el modelo se entrenó con
+> **2000 deportistas sintéticos** generados con reglas documentadas y semilla fija (`backend/ml/synthetic.py`).
+> Se reentrena con `python -m ml.train` cuando haya datos reales. Es una alerta para conversar, no una decisión.
+
+- **Variables** (calculadas desde la base, `backend/ml/features.py`): asistencia de los últimos 30 y 60 días, faltas
+  seguidas recientes, meses en mora, pagos rechazados, meses de antigüedad, edad, jornada de entrenamiento y colegio de
+  jornada única. Sin asistencia registrada se usa un valor neutro (75 %).
+- **Comparación** (validación cruzada estratificada de 5 particiones, `backend/ml/REPORT.md`):
+
+  | Modelo | Accuracy | Precision | Recall | F1 | ROC-AUC |
+  |---|---|---|---|---|---|
+  | **Regresión logística (elegida)** | 0,847 | 0,702 | **0,791** | 0,743 | **0,899** |
+  | Random forest | 0,843 | 0,695 | 0,776 | 0,733 | 0,889 |
+
+  Se elige por **recall**: es peor no detectar a un niño en riesgo que una falsa alarma. Ambos con `class_weight="balanced"`.
+- **Niveles**: bajo < 35 % ≤ medio < 65 % ≤ alto.
+- **Factores de cada deportista**: se reemplaza cada variable por el valor típico de quienes se quedan y se mide cuánto
+  baja el riesgo (en log-odds); se muestran los 2-3 que más pesan.
+- **Render plan gratis**: scikit-learn se importa solo la primera vez que el admin abre el panel. Medido: la API usa
+  ~93 MB y ~176 MB con el modelo cargado (límite 512 MB). El modelo pesa 2 KB (`backend/ml/model.joblib`) y
+  `requirements.txt` fija `scikit-learn==1.9.1` para cargarlo con la misma versión que lo entrenó.
+- **Reentrenar** (CMD):
+  ```cmd
+  cd /d D:\Users\User\Proyecto_Final_Atletico_Sucre\backend
+  .venv\Scripts\activate
+  python -m ml.train
+  ```
 
 ## Patrones de diseño
 

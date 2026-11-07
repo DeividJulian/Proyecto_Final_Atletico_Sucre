@@ -10,3 +10,7 @@ bcrypt>=4.2.0
 # Uploads (player photos, payment receipts) and HTTP calls to Brevo / Supabase Storage
 python-multipart>=0.0.12
 httpx>=0.27.0
+# Dropout-risk model (Fase 8). Exact versions: the saved model (ml/model.joblib) is loaded with the same
+# scikit-learn that trained it. Imported lazily, only when the admin opens the risk panel.
+scikit-learn==1.9.1
+joblib==1.6.0

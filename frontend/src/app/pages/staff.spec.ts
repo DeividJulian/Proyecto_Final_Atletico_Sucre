@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { API_URL } from '../core/config/api-url';
 import { ConfirmService } from '../shared/confirm/confirm.service';
 import { AdminEnrollments } from './admin/enrollments/enrollments';
+import { AdminRisk } from './admin/risk/admin-risk';
 import { CoachAttendance } from './profesor/attendance/attendance';
 
 const SESSION = {
@@ -82,5 +83,33 @@ describe('staff panels', () => {
     expect(reject.request.body).toEqual({ reason: 'Faltan documentos del deportista' });
     reject.flush({ ...PLAYER, enrollment_status: 'rejected' });
     http.expectOne((r) => r.url === `${API_URL}/admin/enrollments`).flush([]);
+  });
+
+  it('admin risk: shows the demo notice, sorts by risk and filters by level', () => {
+    const fixture = TestBed.createComponent(AdminRisk);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const page = fixture.componentInstance as any;
+    fixture.detectChanges();
+    http.expectOne(`${API_URL}/admin/categories`).flush([]);
+    const player = (id: number, level: string, probability: number) => ({
+      player_id: id, player_name: `Jugador ${id}`, category_id: 1, category_name: 'Categoría 2014-2015',
+      guardian_name: 'Andrea', guardian_phone: '3000000001', whatsapp_url: 'https://wa.me/573000000001',
+      probability, level, factors: [{ feature: 'attendance_rate_30', label: 'x', detail: 'Asistencia de 31 %', impact: 1 }],
+      features: {},
+    });
+    http.expectOne((r) => r.url === `${API_URL}/admin/risk`).flush({
+      model: { name: 'logistic_regression', version: 'demo-1', synthetic: true, trained_at: '', training_size: 2000,
+               metrics: { recall: 0.79 }, compared: {}, note: 'Modelo de demostración: datos sintéticos.' },
+      counts: { high: 1, medium: 0, low: 1 },
+      players: [player(1, 'high', 0.99), player(2, 'low', 0.15)],
+    });
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('.demo')?.textContent).toContain('datos sintéticos');
+    expect(element.querySelectorAll('.item').length).toBe(2);
+    page.level.set('high');
+    fixture.detectChanges();
+    expect(element.querySelectorAll('.item').length).toBe(1);
+    expect(element.querySelector('.factors')?.textContent).toContain('Asistencia de 31 %');
   });
 });

@@ -147,6 +147,11 @@ export const routes: Routes = [
         loadComponent: () => import('./shared/announcements-manager/announcements-manager').then((m) => m.AnnouncementsManager),
       },
       {
+        path: 'riesgo',
+        title: `Riesgo de deserción · ${TITLE}`,
+        loadComponent: () => import('./pages/admin/risk/admin-risk').then((m) => m.AdminRisk),
+      },
+      {
         path: 'ajustes',
         title: `Ajustes y app · ${TITLE}`,
         loadComponent: () => import('./pages/admin/settings/admin-settings').then((m) => m.AdminSettings),

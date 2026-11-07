@@ -34,3 +34,7 @@ class Conflict(DomainError):
 
 class ExternalServiceError(DomainError):
     status_code = 502
+
+
+class ServiceUnavailable(DomainError):
+    status_code = 503

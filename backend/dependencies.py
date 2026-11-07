@@ -16,6 +16,7 @@ from services.enrollment import EnrollmentService
 from services.families import FamilyService
 from services.mailer import Mailer, get_mailer
 from services.payments import PaymentService
+from services.risk import RiskService
 from services.stats import StatsService
 from services.storage import FileStorage, get_storage
 
@@ -76,3 +77,7 @@ def get_release_service(db: Session = Depends(get_db)) -> ReleaseService:
 
 def get_settings_service(db: Session = Depends(get_db)) -> SettingsService:
     return SettingsService(db)
+
+
+def get_risk_service(db: Session = Depends(get_db), storage: FileStorage = Depends(storage_dep)) -> RiskService:
+    return RiskService(db, storage)

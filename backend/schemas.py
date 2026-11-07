@@ -731,3 +731,49 @@ class StatsOut(BaseModel):
     revenue_this_month: int
     attendance_rate_30_days: float
     by_category: list[CategoryCountOut]
+
+
+# ---------------------------------------------------------------- dropout risk (Fase 8)
+
+class RiskFactorOut(BaseModel):
+    feature: str
+    label: str
+    detail: str
+    impact: float = Field(description="Cuánto baja el riesgo (log-odds) si este factor tuviera un valor típico")
+
+
+class RiskPlayerOut(BaseModel):
+    player_id: int
+    player_name: str
+    category_id: int | None
+    category_name: str | None
+    guardian_name: str
+    guardian_phone: str
+    whatsapp_url: str
+    probability: float = Field(ge=0, le=1)
+    level: str = Field(description="low | medium | high")
+    factors: list[RiskFactorOut]
+    features: dict[str, float]
+
+
+class RiskCountsOut(BaseModel):
+    high: int
+    medium: int
+    low: int
+
+
+class RiskModelOut(BaseModel):
+    name: str
+    version: str
+    synthetic: bool
+    trained_at: str
+    training_size: int
+    metrics: dict[str, float]
+    compared: dict[str, dict[str, float]]
+    note: str
+
+
+class RiskReportOut(BaseModel):
+    model: RiskModelOut
+    counts: RiskCountsOut
+    players: list[RiskPlayerOut]

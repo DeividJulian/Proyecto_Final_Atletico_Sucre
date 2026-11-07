@@ -144,6 +144,6 @@ Datos de salud (EPS, alergias, etc.) solo visibles para el padre, el profesor de
 4. Frontend: sitio público responsive.
 5. Frontend: login/registro y paneles de padre, profesor y admin.
 6. Despliegue en Vercel y conexión con Render (CORS, variables).
-7. App Flutter para padres + APK en GitHub Releases + sección de descarga en la web.
-8. (Opcional) Analítica: modelo de predicción de riesgo de deserción por deportista (asistencia, pagos al día, antigüedad) con scikit-learn, mostrado en el dashboard del admin.
+7. App Flutter para padres + APK en GitHub Releases + sección de descarga en la web. **PENDIENTE (en pausa)**: la parte 1 (login y mis hijos) está en la rama `feature/mobile`; la sección de descarga de la web ya funciona y espera el APK.
+8. (Opcional) Analítica: modelo de predicción de riesgo de deserción por deportista (asistencia, pagos al día, antigüedad) con scikit-learn, mostrado en el dashboard del admin. **Hecha** con datos sintéticos (`backend/ml/`, `GET /admin/risk`, pestaña "Riesgo de deserción").
 9. Revisión final: pruebas, responsive, seguridad, README y guía para la sustentación.

@@ -12,6 +12,7 @@ import {
   PaymentAdmin,
   PaymentAdminInput,
   PlayerAdminUpdate,
+  RiskReport,
   Stats,
 } from '../models/staff';
 
@@ -31,6 +32,10 @@ export class AdminApiService {
 
   stats(): Observable<Stats> {
     return this.http.get<Stats>(`${this.base}/stats`);
+  }
+
+  risk(categoryId: number | null = null): Observable<RiskReport> {
+    return this.http.get<RiskReport>(`${this.base}/risk`, { params: params({ category_id: categoryId }) });
   }
 
   // ---------- enrollments and players

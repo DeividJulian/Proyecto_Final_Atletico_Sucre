@@ -8,7 +8,7 @@ Idempotent: it can be run many times; what already exists is left as it is (the 
   set in .env. In production (Render) the seed only loads the club data.
 """
 import logging
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ import config
 from database import SessionLocal
 from enums import CategoryGender, PaymentConcept, PaymentMethod, PaymentStatus, Role, TrainingShift
 from main import init_database
-from models import Category, Coach, GalleryItem, Payment, TrainingSession, User, Venue
+from models import Attendance, Category, Coach, GalleryItem, Payment, Player, TrainingSession, User, Venue
 from repositories import SettingsRepository, UserRepository
 from schemas import ApproveIn, RegisterIn
 from security import hash_password
@@ -274,11 +274,51 @@ def seed_test_accounts(session: Session) -> bool:
     return True
 
 
+# Attendance pattern of the last 8 weeks for the demo of the risk panel (development only):
+# 1 = attended, 0 = absent. Mateo attends almost always; Samuel stopped coming in the last weeks.
+DEMO_PATTERNS = {
+    "1000000001": [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    "1000000003": [1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+}
+
+
+def seed_demo_history(session: Session) -> None:
+    """Attendance (and one rejected payment) for the test players, so the risk panel has varied cases."""
+    if not config.IS_DEVELOPMENT or session.scalar(select(Attendance).limit(1)) is not None:
+        return
+    admin = UserRepository(session).admins()
+    recorder = admin[0].id if admin else None
+    today = date.today()
+    for document, pattern in DEMO_PATTERNS.items():
+        player = session.scalar(select(Player).where(Player.document_number == document))
+        if player is None or player.category is None:
+            continue
+        sessions = [s for s in player.category.sessions if s.shift in ("all", "morning" if player.school_shift == "afternoon" else "afternoon")]
+        dates = []
+        day = today - timedelta(days=1)
+        while len(dates) < len(pattern) and day > today - timedelta(days=90):
+            for training in sessions:
+                if day.isoweekday() == training.weekday:
+                    dates.append((day, training))
+            day -= timedelta(days=1)
+        # pattern[0] is the oldest record
+        for (session_day, training), attended in zip(reversed(dates[: len(pattern)]), pattern):
+            session.add(Attendance(player_id=player.id, training_session_id=training.id, session_date=session_day,
+                                   status="present" if attended else "absent", recorded_by_id=recorder))
+        if document == "1000000003":
+            session.add(Payment(player_id=player.id, concept=PaymentConcept.ENROLLMENT, amount=20000,
+                                method=PaymentMethod.NEQUI, paid_on=today - timedelta(days=20),
+                                status=PaymentStatus.REJECTED, rejection_reason="El comprobante no corresponde",
+                                registered_by_id=recorder))
+    session.commit()
+
+
 def run() -> None:
     init_database()
     with SessionLocal() as session:
         seed_club(session)
         seed_test_accounts(session)
+        seed_demo_history(session)
     logger.info("Seed listo")
 
 

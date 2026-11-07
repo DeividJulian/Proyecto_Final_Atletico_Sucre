@@ -124,3 +124,41 @@ export interface AppReleaseFull {
 }
 
 export type PlayerList = Player[];
+
+export type RiskLevel = 'low' | 'medium' | 'high';
+
+export interface RiskFactor {
+  feature: string;
+  label: string;
+  detail: string;
+  impact: number;
+}
+
+export interface RiskPlayer {
+  player_id: number;
+  player_name: string;
+  category_id: number | null;
+  category_name: string | null;
+  guardian_name: string;
+  guardian_phone: string;
+  whatsapp_url: string;
+  probability: number;
+  level: RiskLevel;
+  factors: RiskFactor[];
+  features: Record<string, number>;
+}
+
+export interface RiskReport {
+  model: {
+    name: string;
+    version: string;
+    synthetic: boolean;
+    trained_at: string;
+    training_size: number;
+    metrics: Record<string, number>;
+    compared: Record<string, Record<string, number>>;
+    note: string;
+  };
+  counts: { high: number; medium: number; low: number };
+  players: RiskPlayer[];
+}
