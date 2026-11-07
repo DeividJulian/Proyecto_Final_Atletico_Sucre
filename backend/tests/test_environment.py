@@ -77,3 +77,9 @@ def test_postgres_engine_options_for_supabase_pooler():
     assert options["pool_pre_ping"] is True
     assert options["connect_args"] == {"prepare_threshold": None}
     assert "prepare_threshold" not in _engine_options("sqlite:///x.db").get("connect_args", {})
+
+
+def test_supabase_url_keeps_only_the_origin():
+    assert config._origin("https://abc.supabase.co/rest/v1/") == "https://abc.supabase.co"
+    assert config._origin("https://abc.supabase.co") == "https://abc.supabase.co"
+    assert config._origin("") == ""

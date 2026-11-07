@@ -75,9 +75,10 @@ def gallery(db: Session = Depends(get_db)):
     return GalleryRepository(db).list()
 
 
-@router.get("/app-release", response_model=AppReleaseOut, summary="Versión actual de la app móvil (APK)")
+@router.get(
+    "/app-release",
+    response_model=AppReleaseOut | None,
+    summary="Versión actual de la app móvil (APK); null mientras no haya ninguna publicada",
+)
 def app_release(db: Session = Depends(get_db)):
-    release = AppReleaseRepository(db).current()
-    if release is None:
-        raise NotFound("Todavía no hay una versión de la app publicada.")
-    return release
+    return AppReleaseRepository(db).current()

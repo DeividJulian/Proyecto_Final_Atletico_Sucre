@@ -85,7 +85,8 @@ Referencia de código: `https://github.com/DeividJulian/sistema-horarios-univers
 
 **Despliegue del frontend: Vercel**
 - `frontend/vercel.json` con rewrite de todas las rutas a `index.html` (SPA).
-- Root directory en Vercel: `frontend`. Build: `npm run build`. Output: `dist/<proyecto>/browser`.
+- Root directory en Vercel: `frontend`. Build: `npm run build`. Output: `dist/atletico-sucre-web/browser`.
+- Producción: web https://proyecto-final-atletico-sucre.vercel.app · API https://proyecto-final-atletico-sucre.onrender.com (`FRONTEND_ORIGIN` en Render = la URL de Vercel).
 
 **App móvil** — `mobile/`
 - **Flutter** (como VeriFarmac). Consume la misma API. Arquitectura: `lib/core/` (api client, config, almacenamiento seguro del token con `flutter_secure_storage`), `lib/data/` (modelos + repositorios), `lib/features/` (auth, registro, hijos, asistencia, pagos, avisos), estado con Provider o Riverpod (elige uno y justifícalo).

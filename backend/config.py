@@ -2,6 +2,7 @@
 import hashlib
 import logging
 import os
+from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
 
@@ -92,7 +93,13 @@ EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "Club Atlético Sucre")
 # File storage: local | supabase
 STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "local").strip().lower()
 LOCAL_UPLOAD_DIR = os.getenv("LOCAL_UPLOAD_DIR", "uploads")
-SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
+def _origin(url: str) -> str:
+    """https://abc.supabase.co/rest/v1/ → https://abc.supabase.co (a common copy-paste mistake)."""
+    parts = urlsplit(url.strip())
+    return f"{parts.scheme}://{parts.netloc}" if parts.scheme and parts.netloc else url.strip().rstrip("/")
+
+
+SUPABASE_URL = _origin(os.getenv("SUPABASE_URL", ""))
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "atletico-sucre")
 MAX_UPLOAD_MB = float(os.getenv("MAX_UPLOAD_MB", "5"))

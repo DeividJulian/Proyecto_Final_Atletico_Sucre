@@ -160,3 +160,12 @@ def test_admin_crud_catalog_and_settings(client, admin_token):
 
     stats = client.get("/admin/stats", headers=auth(admin_token)).json()
     assert "players_pending" in stats
+
+
+def test_app_release_is_null_until_published(client, admin_token):
+    assert client.get("/app-release").json() is None
+    published = client.post("/admin/app-releases", headers=auth(admin_token), json={
+        "version": "1.0.0", "build_number": 1,
+        "apk_url": "https://github.com/club/app/releases/download/v1.0.0/app.apk", "is_current": True})
+    assert published.status_code == 201
+    assert client.get("/app-release").json()["version"] == "1.0.0"

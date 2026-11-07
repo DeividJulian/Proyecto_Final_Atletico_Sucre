@@ -97,11 +97,17 @@ class SupabaseStorage(FileStorage):
     def _call(self, method: str, url: str, **kwargs) -> httpx.Response:
         try:
             response = httpx.request(method, url, headers={**self.headers, **kwargs.pop("headers", {})}, timeout=20, **kwargs)
-            response.raise_for_status()
-            return response
         except httpx.HTTPError as error:
-            logger.exception("Supabase Storage failed: %s", error)
+            logger.exception("Supabase Storage unreachable (%s %s): %s", method, url, error)
             raise ExternalServiceError("No pudimos guardar o leer el archivo. Intenta de nuevo.") from error
+        if response.is_error:
+            # Supabase explains the problem in the body (bucket not found, invalid key, mime type not allowed…)
+            logger.error(
+                "Supabase Storage answered %s for %s %s (bucket=%s): %s",
+                response.status_code, method, url, self.bucket, response.text[:300],
+            )
+            raise ExternalServiceError("No pudimos guardar o leer el archivo. Intenta de nuevo.")
+        return response
 
     def save(self, key: str, data: bytes, content_type: str) -> None:
         self._call(

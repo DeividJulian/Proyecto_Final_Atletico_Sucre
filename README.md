@@ -9,7 +9,7 @@ Página web informativa + registro de padres de familia + paneles por rol (padre
 
 | Parte | URL |
 |---|---|
-| Web (Vercel) | _pendiente (Fase 6)_ |
+| Web (Vercel) | https://proyecto-final-atletico-sucre.vercel.app |
 | API (Render) | https://proyecto-final-atletico-sucre.onrender.com — documentación interactiva en [/docs](https://proyecto-final-atletico-sucre.onrender.com/docs), salud en [/health](https://proyecto-final-atletico-sucre.onrender.com/health) |
 | Base de datos | PostgreSQL en Supabase (Session pooler, puerto 5432) con RLS activado en todas las tablas |
 | APK Android | _pendiente (Fase 7)_ — GitHub Releases |
@@ -108,8 +108,13 @@ npm run build      # salida en dist/atletico-sucre-web/browser
   del Session pooler (no crea cuentas de prueba).
 
 ### Frontend en Vercel
-- Root directory: `frontend` · Build: `npm run build` · Output: `dist/atletico-sucre-web/browser`.
-- `frontend/vercel.json` reescribe todas las rutas a `index.html` (SPA).
+- Proyecto: https://proyecto-final-atletico-sucre.vercel.app
+- Se importa como **proyecto único** (no "Services"): Root Directory `frontend`, Framework Preset **Other**.
+  `frontend/vercel.json` define install (`npm ci`), build (`npm run build`), output
+  (`dist/atletico-sucre-web/browser`), el rewrite de todas las rutas a `index.html` (SPA: `/padre`, `/admin`… no dan 404
+  al recargar), caché larga para JS/CSS con hash y encabezados de seguridad. Node `22.x` (en `package.json`).
+- Cada push a `main` despliega solo. La URL de producción va en `FRONTEND_ORIGIN` de Render (sin `/` al final);
+  las URL de vista previa de Vercel no están autorizadas por CORS.
 
 ## Patrones de diseño
 
