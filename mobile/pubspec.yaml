@@ -1,0 +1,45 @@
+name: atletico_sucre
+description: "App de padres de familia del Club Atlético Sucre (Ipiales, Nariño)."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # State management (see README: why Riverpod)
+  flutter_riverpod: ^2.6.1
+  # Navigation with redirect by session
+  go_router: ^14.6.0
+  # REST API
+  http: ^1.2.2
+  http_parser: ^4.0.2
+  # JWT stored in Android Keystore / iOS Keychain
+  flutter_secure_storage: ^9.2.2
+  # Payment receipt photo (camera or gallery) — part 2
+  image_picker: ^1.1.2
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/escudo.png
+
+# App icon from the club crest: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/escudo.png"
+  adaptive_icon_background: "#111111"
+  adaptive_icon_foreground: "assets/escudo.png"
+  min_sdk_android: 21
